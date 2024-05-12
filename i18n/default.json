@@ -1,0 +1,13 @@
+{ 
+    "dialogbox.question": "How should I use my watering can?",
+    "dialogbox.option0": "Tile (1)",
+    "dialogbox.option1": "Row (3)",
+    "dialogbox.option2": "Row (5)",
+    "dialogbox.option3": "Square (3x3)",
+    "dialogbox.option4": "Rectangle (6x3)",
+    "dialogbox.currentOption": "Current",
+    "configMenu.enabled.name": "Enabled",
+    "configMenu.enabled.tooltip": "Enable or disable the mod function.",
+    "configMenu.modeOpenKey.name": "Open selection menu",
+    "configMenu.modeOpenKey.tooltip": "Bind key for open selection menu."
+}

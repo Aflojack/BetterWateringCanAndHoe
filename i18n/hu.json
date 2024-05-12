@@ -1,0 +1,13 @@
+{
+    "dialogbox.question": "Hogyan használjam az öntözőkannám?",
+    "dialogbox.option0": "Mező (1)",
+    "dialogbox.option1": "Sor (3)",
+    "dialogbox.option2": "Sor (5)",
+    "dialogbox.option3": "Négyzet (3x3)",
+    "dialogbox.option4": "Téglalap (6x3)",
+    "dialogbox.currentOption": "Jelenlegi",
+    "configMenu.enabled.name": "Bekapcsolva",
+    "configMenu.enabled.tooltip": "Kiegészítő funkcióinak be- és kikapcsolása.",
+    "configMenu.modeOpenKey.name": "Választó menü megnyitás",
+    "configMenu.modeOpenKey.tooltip": "Beállítható gomb a választó menü megnyitásához."
+}
