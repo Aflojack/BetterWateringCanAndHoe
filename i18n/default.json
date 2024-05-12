@@ -8,6 +8,6 @@
     "dialogbox.currentOption": "Current",
     "configMenu.enabled.name": "Enabled",
     "configMenu.enabled.tooltip": "Enable or disable the mod function.",
-    "configMenu.modeOpenKey.name": "Open selection menu",
-    "configMenu.modeOpenKey.tooltip": "Bind key for open selection menu."
+    "configMenu.selectionOpenKey.name": "Open selection menu",
+    "configMenu.selectionOpenKey.tooltip": "Bind key for open selection menu."
 }

@@ -66,8 +66,8 @@ namespace BetterWateringCan{
 
             configMenu.AddKeybind(
                 mod: this.ModManifest,
-                name: () => this.Helper.Translation.Get("configMenu.modeOpenKey.name"),
-                tooltip: () => this.Helper.Translation.Get("configMenu.modeOpenKey.tooltip"),
+                name: () => this.Helper.Translation.Get("configMenu.selectionOpenKey.name"),
+                tooltip: () => this.Helper.Translation.Get("configMenu.selectionOpenKey.tooltip"),
                 getValue: () => this.Config.SelectionOpenKey,
                 setValue: value => this.Config.SelectionOpenKey = value
             );

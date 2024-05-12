@@ -8,6 +8,6 @@
     "dialogbox.currentOption": "Jelenlegi",
     "configMenu.enabled.name": "Bekapcsolva",
     "configMenu.enabled.tooltip": "Kiegészítő funkcióinak be- és kikapcsolása.",
-    "configMenu.modeOpenKey.name": "Választó menü megnyitás",
-    "configMenu.modeOpenKey.tooltip": "Beállítható gomb a választó menü megnyitásához."
+    "configMenu.selectionOpenKey.name": "Választó menü megnyitás",
+    "configMenu.selectionOpenKey.tooltip": "Beállítható gomb a választó menü megnyitásához."
 }
