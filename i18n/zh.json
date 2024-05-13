@@ -1,0 +1,13 @@
+{
+    "dialogbox.question": "我该如何使用喷壶?",
+    "dialogbox.option0": "格 (1)",
+    "dialogbox.option1": "条 (3)",
+    "dialogbox.option2": "条 (5)",
+    "dialogbox.option3": "正方形 (3x3)",
+    "dialogbox.option4": "长方形 (6x3)",
+    "dialogbox.currentOption": "当前的",
+    "configMenu.enabled.name": "启用",
+    "configMenu.enabled.tooltip": "启用或禁用模组功能",
+    "configMenu.selectionOpenKey.name": "打开选择菜单",
+    "configMenu.selectionOpenKey.tooltip": "打开选择菜单的绑定键"
+}
