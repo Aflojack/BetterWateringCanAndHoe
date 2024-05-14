@@ -87,9 +87,8 @@ namespace BetterWateringCan{
                 return;
 
             int currentUpgradeLevel=Game1.player.CurrentTool.UpgradeLevel;
-            if(this.Data.SelectedOption>currentUpgradeLevel || this.Data.SelectedOption<0){
-                this.Monitor.Log($"Illegal value for mode selection. Selected value is out of range or not valid with {currentUpgradeLevel} level watering can. Value was {this.Data.SelectedOption} now set to default.", LogLevel.Error);
-                this.Data.SelectedOption=1;
+            if((this.Data.SelectedOption>currentUpgradeLevel && !String.Equals(Game1.player.CurrentTool.enchantments.ToString(),$"StardewValley.Enchantments.ReachingToolEnchantment")) || this.Data.SelectedOption<0){
+                this.Data.SelectedOption=0;
                 this.dataChanged=true;
             }
 
@@ -118,19 +117,24 @@ namespace BetterWateringCan{
 
             SButtonState state = this.Helper.Input.GetState(this.Config.SelectionOpenKey);
             if (state==SButtonState.Released){
-                SelectionOpen(Game1.player.CurrentTool.UpgradeLevel);
+                SelectionOpen();
             }
         }
 
         /// <summary>Display a dialogue window to the player. Content depending on the level of the watering can.</summary>
         /// <param name="upgradeLevel">Currect watering can upgrade level.</param>
-        private void SelectionOpen(int upgradeLevel){
+        private void SelectionOpen(){
+            int upgradeLevel=Game1.player.CurrentTool.UpgradeLevel;
             List<Response> choices = new List<Response>();
             string selectionText=this.Helper.Translation.Get("dialogbox.currentOption");
             for(int i=0;i<Math.Min(upgradeLevel+1,5);i++){
                 string responseKey=$"{i}";
                 string responseText=this.Helper.Translation.Get($"dialogbox.option{i}");
                 choices.Add(new Response(responseKey,responseText+(this.Data.SelectedOption==i?$" --- {selectionText} ---":"")));
+            }
+            if(String.Equals(Game1.player.CurrentTool.enchantments.ToString(),$"StardewValley.Enchantments.ReachingToolEnchantment")){
+                string responseText=this.Helper.Translation.Get($"dialogbox.option5");
+                choices.Add(new Response("5",responseText+(this.Data.SelectedOption==5?$" --- {selectionText} ---":"")));
             }
             Game1.currentLocation.createQuestionDialogue(this.Helper.Translation.Get("dialogbox.question"), choices.ToArray(), new GameLocation.afterQuestionBehavior(DialogueSet));
         }

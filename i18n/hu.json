@@ -5,6 +5,7 @@
     "dialogbox.option2": "Sor (5)",
     "dialogbox.option3": "Négyzet (3x3)",
     "dialogbox.option4": "Téglalap (6x3)",
+    "dialogbox.option5": "Négyzet (5x5)",
     "dialogbox.currentOption": "Jelenlegi",
     "configMenu.enabled.name": "Bekapcsolva",
     "configMenu.enabled.tooltip": "Kiegészítő funkcióinak be- és kikapcsolása.",
