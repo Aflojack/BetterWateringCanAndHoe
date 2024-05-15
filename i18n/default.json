@@ -10,5 +10,9 @@
     "configMenu.enabled.name": "Enabled",
     "configMenu.enabled.tooltip": "Enable or disable the mod function.",
     "configMenu.selectionOpenKey.name": "Open selection menu",
-    "configMenu.selectionOpenKey.tooltip": "Bind key for open selection menu."
+    "configMenu.selectionOpenKey.tooltip": "Bind key for open selection menu.",
+    "configMenu.alwaysHighestOption.name": "Always highest option",
+    "configMenu.alwaysHighestOption.tooltip": "If this setting is checked then the mod automatically select the highest option available for the current Watering Can. (If this active you cannot use selection menu)",
+    "configMenu.selectTemporary.name": "Select only temporary",
+    "configMenu.selectTemporary.tooltip": "Only check if 'Always select highest option' checked too. If this setting is checked then you can use selection menu and use the selected mode but only temporary (which is ~60 seconds if you don't open selection menu again). After timer countdown ends the highest option will be restored. This setting for those who rarely but want to use lower option too."
 }

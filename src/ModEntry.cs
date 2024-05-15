@@ -17,6 +17,10 @@ namespace BetterWateringCan{
     private ModData Data;
     /// <summary>Bool value for data change detection.</summary>
     private bool dataChanged;
+    /// <summary>Timer for SelectTemporary setting.</summary>
+    private int timerCounter=0;
+    /// <summary>Timer starer value in OnUpdateTicked 3600 means ~60 seconds.</summary>
+    private int timerStart=3600;
     
         /**********
         ** Public methods
@@ -71,6 +75,22 @@ namespace BetterWateringCan{
                 getValue: () => this.Config.SelectionOpenKey,
                 setValue: value => this.Config.SelectionOpenKey = value
             );
+
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                name: () => this.Helper.Translation.Get("configMenu.alwaysHighestOption.name"),
+                tooltip: () => this.Helper.Translation.Get("configMenu.alwaysHighestOption.tooltip"),
+                getValue: () => this.Config.AlwaysHighestOption,
+                setValue: value => this.Config.AlwaysHighestOption = value
+            );
+
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                name: () => this.Helper.Translation.Get("configMenu.selectTemporary.name"),
+                tooltip: () => this.Helper.Translation.Get("configMenu.selectTemporary.tooltip"),
+                getValue: () => this.Config.SelectTemporary,
+                setValue: value => this.Config.SelectTemporary = value
+            );
         }
 
         /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
@@ -89,6 +109,16 @@ namespace BetterWateringCan{
             if(this.Data.SelectedOption>GetMaximumSelectableOptionValue() || this.Data.SelectedOption<0){
                 this.Data.SelectedOption=0;
                 this.dataChanged=true;
+            }
+
+            if(this.Config.AlwaysHighestOption){
+                int highestOption=this.GetMaximumSelectableOptionValue();
+                if(this.Config.SelectTemporary && timerCounter!=0){
+                    timerCounter--;
+                }else if(this.Data.SelectedOption!=highestOption){
+                    this.Data.SelectedOption=highestOption;
+                    this.dataChanged=true;
+                }
             }
 
             if(dataChanged){
@@ -114,8 +144,15 @@ namespace BetterWateringCan{
             if (Game1.player.CurrentTool is not WateringCan)
                 return;
 
+            if(this.Config.AlwaysHighestOption && !this.Config.SelectTemporary){
+                return;
+            }
+
             SButtonState state = this.Helper.Input.GetState(this.Config.SelectionOpenKey);
             if (state==SButtonState.Released){
+                if(this.Config.AlwaysHighestOption && this.Config.SelectTemporary){
+                    this.timerCounter=this.timerStart;
+                }
                 SelectionOpen();
             }
         }
@@ -132,7 +169,7 @@ namespace BetterWateringCan{
             Game1.currentLocation.createQuestionDialogue(this.Helper.Translation.Get("dialogbox.question"), choices.ToArray(), new GameLocation.afterQuestionBehavior(DialogueSet));
         }
 
-        /// <summary>Determine which is the maximum seletable option value with the currect Watering Can.</summary>
+        /// <summary>Determine which is the maximum seletable option value with the current Watering Can.</summary>
         private int GetMaximumSelectableOptionValue(){
             int upgradeLevel=Game1.player.CurrentTool.UpgradeLevel;
             bool isHaveReachingEnchantment=String.Equals(Game1.player.CurrentTool.enchantments.ToString(),$"StardewValley.Enchantments.ReachingToolEnchantment");
