@@ -86,8 +86,7 @@ namespace BetterWateringCan{
             if (Game1.player.CurrentTool is not WateringCan)
                 return;
 
-            int currentUpgradeLevel=Game1.player.CurrentTool.UpgradeLevel;
-            if((this.Data.SelectedOption>currentUpgradeLevel && !String.Equals(Game1.player.CurrentTool.enchantments.ToString(),$"StardewValley.Enchantments.ReachingToolEnchantment")) || this.Data.SelectedOption<0){
+            if(this.Data.SelectedOption>GetMaximumSelectableOptionValue() || this.Data.SelectedOption<0){
                 this.Data.SelectedOption=0;
                 this.dataChanged=true;
             }
@@ -122,21 +121,33 @@ namespace BetterWateringCan{
         }
 
         /// <summary>Display a dialogue window to the player. Content depending on the level of the watering can.</summary>
-        /// <param name="upgradeLevel">Currect watering can upgrade level.</param>
         private void SelectionOpen(){
-            int upgradeLevel=Game1.player.CurrentTool.UpgradeLevel;
             List<Response> choices = new List<Response>();
             string selectionText=this.Helper.Translation.Get("dialogbox.currentOption");
-            for(int i=0;i<Math.Min(upgradeLevel+1,5);i++){
+            for(int i=0;i<=GetMaximumSelectableOptionValue();i++){
                 string responseKey=$"{i}";
                 string responseText=this.Helper.Translation.Get($"dialogbox.option{i}");
                 choices.Add(new Response(responseKey,responseText+(this.Data.SelectedOption==i?$" --- {selectionText} ---":"")));
             }
-            if(String.Equals(Game1.player.CurrentTool.enchantments.ToString(),$"StardewValley.Enchantments.ReachingToolEnchantment")){
-                string responseText=this.Helper.Translation.Get($"dialogbox.option5");
-                choices.Add(new Response("5",responseText+(this.Data.SelectedOption==5?$" --- {selectionText} ---":"")));
-            }
             Game1.currentLocation.createQuestionDialogue(this.Helper.Translation.Get("dialogbox.question"), choices.ToArray(), new GameLocation.afterQuestionBehavior(DialogueSet));
+        }
+
+        /// <summary>Determine which is the maximum seletable option value with the currect Watering Can.</summary>
+        private int GetMaximumSelectableOptionValue(){
+            int upgradeLevel=Game1.player.CurrentTool.UpgradeLevel;
+            bool isHaveReachingEnchantment=String.Equals(Game1.player.CurrentTool.enchantments.ToString(),$"StardewValley.Enchantments.ReachingToolEnchantment");
+            switch(upgradeLevel){
+                case 0:
+                case 1:
+                case 2:
+                case 3: return upgradeLevel;
+                case 4: 
+                        if(isHaveReachingEnchantment){
+                            return 5;
+                        }
+                        return 4;
+                default: return 0;
+            }
         }
 
         /// <summary>Save the selected option after dialogbox closed.</summary>
