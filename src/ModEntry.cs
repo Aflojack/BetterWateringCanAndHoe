@@ -19,6 +19,8 @@ namespace BetterWateringCan{
     private bool dataChanged;
     /// <summary>Timer for Watering Can SelectTemporary setting.</summary>
     private int wateringCanTimerCounter=0;
+    /// <summary>Timer for Hoe SelectTemporary setting.</summary>
+    private int hoeTimerCounter=0;
     /// <summary>Timer starer value in OnUpdateTicked 3600 means ~60 seconds.</summary>
     private readonly int timerStart=3600;
     
@@ -138,8 +140,14 @@ namespace BetterWateringCan{
                 WateringCanModTick();
                 return;
             }
+
+            if(this.Config.BetterHoeModEnabled && Game1.player.CurrentTool is Hoe){
+                HoeModTick();
+                return;
+            }
         }
 
+        /// <summary>Tick method for watering can mod.</summary>
         private void WateringCanModTick(){
             if(this.Data.WateringCanSelectedOption>GetMaximumSelectableOptionValue() || this.Data.WateringCanSelectedOption<0){
                 this.Data.WateringCanSelectedOption=0;
@@ -163,6 +171,30 @@ namespace BetterWateringCan{
             Game1.player.toolPower.Value=this.Data.WateringCanSelectedOption;
         }
 
+        /// <summary>Tick method for hoe mod.</summary>
+        private void HoeModTick(){
+            if(this.Data.HoeSelectedOption>GetMaximumSelectableOptionValue() || this.Data.HoeSelectedOption<0){
+                this.Data.HoeSelectedOption=0;
+                this.dataChanged=true;
+            }
+
+            if(this.Config.HoeAlwaysHighestOption){
+                int highestOption=this.GetMaximumSelectableOptionValue();
+                if(this.Config.HoeSelectTemporary && hoeTimerCounter!=0){
+                    hoeTimerCounter--;
+                }else if(this.Data.HoeSelectedOption!=highestOption){
+                    this.Data.HoeSelectedOption=highestOption;
+                    this.dataChanged=true;
+                }
+            }
+
+            if(dataChanged){
+                ModDataWrite();
+            }
+
+            Game1.player.toolPower.Value=this.Data.HoeSelectedOption;
+        }
+
         /// <summary>Raised after the player pressed/released any buttons on the keyboard, mouse, or controller.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
@@ -176,9 +208,15 @@ namespace BetterWateringCan{
             if (this.Config.BetterWateringCanModEnabled && Game1.player.CurrentTool is WateringCan){
                 WateringCanButtonAction();
                 return;
-            }    
+            }
+
+            if (this.Config.BetterHoeModEnabled && Game1.player.CurrentTool is Hoe){
+                HoeButtonAction();
+                return;
+            }
         }
 
+        /// <summary>Button change action for watering can mod.</summary>
         private void WateringCanButtonAction(){
             if(this.Config.WateringCanAlwaysHighestOption && !this.Config.WateringCanSelectTemporary){
                 return;
@@ -200,6 +238,28 @@ namespace BetterWateringCan{
             }
         }
 
+        /// <summary>Button change action for hoe mod.</summary>
+        private void HoeButtonAction(){
+            if(this.Config.HoeAlwaysHighestOption && !this.Config.HoeSelectTemporary){
+                return;
+            }
+
+            SButtonState state = this.Helper.Input.GetState(this.Config.SelectionOpenKey);
+            if(state==SButtonState.Released){
+                if(this.Config.HoeAlwaysHighestOption && this.Config.HoeSelectTemporary){
+                    this.hoeTimerCounter=this.timerStart;
+                }
+                List<Response> choices = new List<Response>();
+                string selectionText=this.Helper.Translation.Get("dialogbox.currentOption");
+                for(int i=0;i<=GetMaximumSelectableOptionValue();i++){
+                    string responseKey=$"{i}";
+                    string responseText=this.Helper.Translation.Get($"dialogbox.option{i}");
+                    choices.Add(new Response(responseKey,responseText+(this.Data.HoeSelectedOption==i?$" --- {selectionText} ---":"")));
+                }
+                Game1.currentLocation.createQuestionDialogue(this.Helper.Translation.Get("dialogbox.hoeQuestion"), choices.ToArray(), new GameLocation.afterQuestionBehavior(DialogueSetHoe));
+            }
+        }
+
         /// <summary>Determine which is the maximum seletable option value with the current Watering Can.</summary>
         private int GetMaximumSelectableOptionValue(){
             int upgradeLevel=Game1.player.CurrentTool.UpgradeLevel;
@@ -218,11 +278,19 @@ namespace BetterWateringCan{
             }
         }
 
-        /// <summary>Save the selected option for Watering Can after dialogbox closed.</summary>
+        /// <summary>Save the selected option for watering can after dialogbox closed.</summary>
         /// <param name="who">Actual farmer.</param>
         /// <param name="selectedOption">Selected option.</param>
         private void DialogueSetWateringCan(Farmer who, string selectedOption){
             this.Data.WateringCanSelectedOption=int.Parse(selectedOption);
+            this.dataChanged=true;
+        }
+
+        /// <summary>Save the selected option for hoe after dialogbox closed.</summary>
+        /// <param name="who">Actual farmer.</param>
+        /// <param name="selectedOption">Selected option.</param>
+        private void DialogueSetHoe(Farmer who, string selectedOption){
+            this.Data.HoeSelectedOption=int.Parse(selectedOption);
             this.dataChanged=true;
         }
 

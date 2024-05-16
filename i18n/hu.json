@@ -1,5 +1,6 @@
 {
     "dialogbox.question": "Hogyan használjam az öntözőkannám?",
+    "dialogbox.hoeQuestion": "Hogyan használjam a kapámat",
     "dialogbox.option0": "Mező (1)",
     "dialogbox.option1": "Sor (3)",
     "dialogbox.option2": "Sor (5)",
@@ -7,6 +8,8 @@
     "dialogbox.option4": "Téglalap (6x3)",
     "dialogbox.option5": "Négyzet (5x5)",
     "dialogbox.currentOption": "Jelenlegi",
+    "configMenu.wateringCan.title": "Jobb öntözőkanna",
+    "configMenu.hoe.title": "Jobb kapa",
     "configMenu.enabled.name": "Bekapcsolva",
     "configMenu.enabled.tooltip": "Kiegészítő funkcióinak be- és kikapcsolása.",
     "configMenu.selectionOpenKey.name": "Választó menü megnyitás",
