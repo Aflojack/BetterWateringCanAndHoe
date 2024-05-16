@@ -1,7 +1,7 @@
 {
     "Name": "Better Watering Can",
     "Author": "Aflojack45",
-    "Version": "1.2.0",
+    "Version": "2.0.0",
     "Description": "This mod provide a little tweak for watering can. In vanilla after upgrade your can you have access to water multiple tiles at once but you have to 'power up' before choose any of that that. Which is really boring sometime. This mod change that and you can select and use your preferred mode as default.",
     "UniqueID": "Aflojack45.BetterWateringCan",
     "EntryDll": "BetterWateringCan.dll",
