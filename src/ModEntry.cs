@@ -4,10 +4,10 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Tools;
 
-namespace BetterWateringCan{
+namespace BetterWateringCanAndHoe{
     /// <summary>The mod entry point.</summary>
     internal sealed class ModEntry : Mod{
-        
+    
     /*********
     ** Properties
     *********/
