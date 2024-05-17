@@ -21,8 +21,6 @@ namespace BetterWateringCanAndHoe{
     private int wateringCanTimerCounter=0;
     /// <summary>Timer for Hoe SelectTemporary setting.</summary>
     private int hoeTimerCounter=0;
-    /// <summary>Timer starer value in OnUpdateTicked 3600 means ~60 seconds.</summary>
-    private readonly int timerStart=3600;
     
         /**********
         ** Public methods
@@ -225,7 +223,7 @@ namespace BetterWateringCanAndHoe{
             SButtonState state = this.Helper.Input.GetState(this.Config.SelectionOpenKey);
             if(state==SButtonState.Released){
                 if(this.Config.WateringCanAlwaysHighestOption && this.Config.WateringCanSelectTemporary){
-                    this.wateringCanTimerCounter=this.timerStart;
+                    this.wateringCanTimerCounter=this.Config.TimerStart;
                 }
                 List<Response> choices = new List<Response>();
                 string selectionText=this.Helper.Translation.Get("dialogbox.currentOption");
@@ -247,7 +245,7 @@ namespace BetterWateringCanAndHoe{
             SButtonState state = this.Helper.Input.GetState(this.Config.SelectionOpenKey);
             if(state==SButtonState.Released){
                 if(this.Config.HoeAlwaysHighestOption && this.Config.HoeSelectTemporary){
-                    this.hoeTimerCounter=this.timerStart;
+                    this.hoeTimerCounter=this.Config.TimerStart;
                 }
                 List<Response> choices = new List<Response>();
                 string selectionText=this.Helper.Translation.Get("dialogbox.currentOption");

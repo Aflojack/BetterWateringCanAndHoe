@@ -15,7 +15,7 @@
     "configMenu.selectionOpenKey.name": "Open selection menu",
     "configMenu.selectionOpenKey.tooltip": "Bind key for open selection menu.",
     "configMenu.alwaysHighestOption.name": "Always highest option",
-    "configMenu.alwaysHighestOption.tooltip": "If this setting is checked then it will automatically select highest options for your tool. (You cannot open selection menu)",
+    "configMenu.alwaysHighestOption.tooltip": "If this setting is checked then it will automatically select highest options for your tool. (You cannot open selection menu if this option activated only)",
     "configMenu.selectTemporary.name": "Select only temporary",
     "configMenu.selectTemporary.tooltip": "If this setting is checked then you can open the selection menu but your selected option only will remain for ~60 second before the highest option will be restored."
 }
