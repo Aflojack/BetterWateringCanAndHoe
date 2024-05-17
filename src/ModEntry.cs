@@ -225,13 +225,7 @@ namespace BetterWateringCanAndHoe{
                 if(this.Config.WateringCanAlwaysHighestOption && this.Config.WateringCanSelectTemporary){
                     this.wateringCanTimerCounter=this.Config.TimerStart;
                 }
-                List<Response> choices = new List<Response>();
-                string selectionText=this.Helper.Translation.Get("dialogbox.currentOption");
-                for(int i=0;i<=GetMaximumSelectableOptionValue();i++){
-                    string responseKey=$"{i}";
-                    string responseText=this.Helper.Translation.Get($"dialogbox.option{i}");
-                    choices.Add(new Response(responseKey,responseText+(this.Data.WateringCanSelectedOption==i?$" --- {selectionText} ---":"")));
-                }
+                List<Response> choices=ChoicesBuilder(this.Data.WateringCanSelectedOption);
                 Game1.currentLocation.createQuestionDialogue(this.Helper.Translation.Get("dialogbox.wateringCanQuestion"), choices.ToArray(), new GameLocation.afterQuestionBehavior(DialogueSetWateringCan));
             }
         }
@@ -247,15 +241,22 @@ namespace BetterWateringCanAndHoe{
                 if(this.Config.HoeAlwaysHighestOption && this.Config.HoeSelectTemporary){
                     this.hoeTimerCounter=this.Config.TimerStart;
                 }
-                List<Response> choices = new List<Response>();
-                string selectionText=this.Helper.Translation.Get("dialogbox.currentOption");
-                for(int i=0;i<=GetMaximumSelectableOptionValue();i++){
-                    string responseKey=$"{i}";
-                    string responseText=this.Helper.Translation.Get($"dialogbox.option{i}");
-                    choices.Add(new Response(responseKey,responseText+(this.Data.HoeSelectedOption==i?$" --- {selectionText} ---":"")));
-                }
+                List<Response> choices=ChoicesBuilder(this.Data.HoeSelectedOption);
                 Game1.currentLocation.createQuestionDialogue(this.Helper.Translation.Get("dialogbox.hoeQuestion"), choices.ToArray(), new GameLocation.afterQuestionBehavior(DialogueSetHoe));
             }
+        }
+
+        /// <summary>Build response list for question dialogue.</summary>
+        /// /// <param name="selectedOption">The selected option for actual tool.</param>
+        private List<Response> ChoicesBuilder(int selectedOption){
+            List<Response> choices = new List<Response>();
+            string selectionText=this.Helper.Translation.Get("dialogbox.currentOption");
+            for(int i=0;i<=GetMaximumSelectableOptionValue();i++){
+                string responseKey=$"{i}";
+                string responseText=this.Helper.Translation.Get($"dialogbox.option{i}");
+                choices.Add(new Response(responseKey,responseText+(selectedOption==i?$" --- {selectionText} ---":"")));
+            }
+            return choices;
         }
 
         /// <summary>Determine which is the maximum seletable option value with the current Watering Can.</summary>
