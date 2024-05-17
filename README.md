@@ -1,4 +1,4 @@
-# BetterWateringCan
+# BetterWateringCanAndHoe
 
 This is a little project for modding Stardew Valley in C# using SMAPI.
 

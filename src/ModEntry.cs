@@ -4,10 +4,10 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Tools;
 
-namespace BetterWateringCan{
+namespace BetterWateringCanAndHoe{
     /// <summary>The mod entry point.</summary>
     internal sealed class ModEntry : Mod{
-        
+    
     /*********
     ** Properties
     *********/
@@ -17,6 +17,10 @@ namespace BetterWateringCan{
     private ModData Data;
     /// <summary>Bool value for data change detection.</summary>
     private bool dataChanged;
+    /// <summary>Timer for Watering Can SelectTemporary setting.</summary>
+    private int wateringCanTimerCounter=0;
+    /// <summary>Timer for Hoe SelectTemporary setting.</summary>
+    private int hoeTimerCounter=0;
     
         /**********
         ** Public methods
@@ -56,14 +60,6 @@ namespace BetterWateringCan{
                 save: () => this.Helper.WriteConfig(this.Config)
             );
 
-            configMenu.AddBoolOption(
-                mod: this.ModManifest,
-                name: () => this.Helper.Translation.Get("configMenu.enabled.name"),
-                tooltip: () => this.Helper.Translation.Get("configMenu.enabled.tooltip"),
-                getValue: () => this.Config.ModEnabled,
-                setValue: value => this.Config.ModEnabled = value
-            );
-
             configMenu.AddKeybind(
                 mod: this.ModManifest,
                 name: () => this.Helper.Translation.Get("configMenu.selectionOpenKey.name"),
@@ -71,79 +67,229 @@ namespace BetterWateringCan{
                 getValue: () => this.Config.SelectionOpenKey,
                 setValue: value => this.Config.SelectionOpenKey = value
             );
+
+            configMenu.AddSectionTitle(
+                mod: this.ModManifest,
+                text: () => this.Helper.Translation.Get("configMenu.wateringCan.title")
+            );
+
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                name: () => this.Helper.Translation.Get("configMenu.enabled.name"),
+                tooltip: () => this.Helper.Translation.Get("configMenu.enabled.tooltip"),
+                getValue: () => this.Config.BetterWateringCanModEnabled,
+                setValue: value => this.Config.BetterWateringCanModEnabled = value
+            );
+
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                name: () => this.Helper.Translation.Get("configMenu.alwaysHighestOption.name"),
+                tooltip: () => this.Helper.Translation.Get("configMenu.alwaysHighestOption.tooltip"),
+                getValue: () => this.Config.WateringCanAlwaysHighestOption,
+                setValue: value => this.Config.WateringCanAlwaysHighestOption = value
+            );
+
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                name: () => this.Helper.Translation.Get("configMenu.selectTemporary.name"),
+                tooltip: () => this.Helper.Translation.Get("configMenu.selectTemporary.tooltip"),
+                getValue: () => this.Config.WateringCanSelectTemporary,
+                setValue: value => this.Config.WateringCanSelectTemporary = value
+            );
+
+            configMenu.AddSectionTitle(
+                mod: this.ModManifest,
+                text: () => this.Helper.Translation.Get("configMenu.hoe.title")
+            );
+
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                name: () => this.Helper.Translation.Get("configMenu.enabled.name"),
+                tooltip: () => this.Helper.Translation.Get("configMenu.enabled.tooltip"),
+                getValue: () => this.Config.BetterHoeModEnabled,
+                setValue: value => this.Config.BetterHoeModEnabled = value
+            );
+
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                name: () => this.Helper.Translation.Get("configMenu.alwaysHighestOption.name"),
+                tooltip: () => this.Helper.Translation.Get("configMenu.alwaysHighestOption.tooltip"),
+                getValue: () => this.Config.HoeAlwaysHighestOption,
+                setValue: value => this.Config.HoeAlwaysHighestOption = value
+            );
+
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                name: () => this.Helper.Translation.Get("configMenu.selectTemporary.name"),
+                tooltip: () => this.Helper.Translation.Get("configMenu.selectTemporary.tooltip"),
+                getValue: () => this.Config.HoeSelectTemporary,
+                setValue: value => this.Config.HoeSelectTemporary = value
+            );
         }
 
         /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
         private void OnUpdateTicked(object? sender, UpdateTickedEventArgs e){
-            if (!this.Config.ModEnabled)
-                return;
-
             if (!Context.IsWorldReady)
                 return;
-            
-            if (Game1.player.CurrentTool is not WateringCan)
-                return;
 
-            int currentUpgradeLevel=Game1.player.CurrentTool.UpgradeLevel;
-            if((this.Data.SelectedOption>currentUpgradeLevel && !String.Equals(Game1.player.CurrentTool.enchantments.ToString(),$"StardewValley.Enchantments.ReachingToolEnchantment")) || this.Data.SelectedOption<0){
-                this.Data.SelectedOption=0;
+            if(this.Config.BetterWateringCanModEnabled && Game1.player.CurrentTool is WateringCan){
+                WateringCanModTick();
+                return;
+            }
+
+            if(this.Config.BetterHoeModEnabled && Game1.player.CurrentTool is Hoe){
+                HoeModTick();
+                return;
+            }
+        }
+
+        /// <summary>Tick method for watering can mod.</summary>
+        private void WateringCanModTick(){
+            if(this.Data.WateringCanSelectedOption>GetMaximumSelectableOptionValue() || this.Data.WateringCanSelectedOption<0){
+                this.Data.WateringCanSelectedOption=0;
                 this.dataChanged=true;
+            }
+
+            if(this.Config.WateringCanAlwaysHighestOption){
+                int highestOption=this.GetMaximumSelectableOptionValue();
+                if(this.Config.WateringCanSelectTemporary && wateringCanTimerCounter!=0){
+                    wateringCanTimerCounter--;
+                }else if(this.Data.WateringCanSelectedOption!=highestOption){
+                    this.Data.WateringCanSelectedOption=highestOption;
+                    this.dataChanged=true;
+                }
             }
 
             if(dataChanged){
                 ModDataWrite();
             }
 
-            Game1.player.toolPower.Value=this.Data.SelectedOption;
+            Game1.player.toolPower.Value=this.Data.WateringCanSelectedOption;
+        }
+
+        /// <summary>Tick method for hoe mod.</summary>
+        private void HoeModTick(){
+            if(this.Data.HoeSelectedOption>GetMaximumSelectableOptionValue() || this.Data.HoeSelectedOption<0){
+                this.Data.HoeSelectedOption=0;
+                this.dataChanged=true;
+            }
+
+            if(this.Config.HoeAlwaysHighestOption){
+                int highestOption=this.GetMaximumSelectableOptionValue();
+                if(this.Config.HoeSelectTemporary && hoeTimerCounter!=0){
+                    hoeTimerCounter--;
+                }else if(this.Data.HoeSelectedOption!=highestOption){
+                    this.Data.HoeSelectedOption=highestOption;
+                    this.dataChanged=true;
+                }
+            }
+
+            if(dataChanged){
+                ModDataWrite();
+            }
+
+            Game1.player.toolPower.Value=this.Data.HoeSelectedOption;
         }
 
         /// <summary>Raised after the player pressed/released any buttons on the keyboard, mouse, or controller.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
         private void OnButtonsChanged(object? sender, ButtonsChangedEventArgs e){
-            if (!this.Config.ModEnabled)
-                return;
-                
             if (!Context.IsWorldReady)
                 return;
 
             if (Game1.player.IsBusyDoingSomething())
                 return;
 
-            if (Game1.player.CurrentTool is not WateringCan)
+            if (this.Config.BetterWateringCanModEnabled && Game1.player.CurrentTool is WateringCan){
+                WateringCanButtonAction();
                 return;
+            }
+
+            if (this.Config.BetterHoeModEnabled && Game1.player.CurrentTool is Hoe){
+                HoeButtonAction();
+                return;
+            }
+        }
+
+        /// <summary>Button change action for watering can mod.</summary>
+        private void WateringCanButtonAction(){
+            if(this.Config.WateringCanAlwaysHighestOption && !this.Config.WateringCanSelectTemporary){
+                return;
+            }
 
             SButtonState state = this.Helper.Input.GetState(this.Config.SelectionOpenKey);
-            if (state==SButtonState.Released){
-                SelectionOpen();
+            if(state==SButtonState.Released){
+                if(this.Config.WateringCanAlwaysHighestOption && this.Config.WateringCanSelectTemporary){
+                    this.wateringCanTimerCounter=this.Config.TimerStart;
+                }
+                List<Response> choices=ChoicesBuilder(this.Data.WateringCanSelectedOption);
+                Game1.currentLocation.createQuestionDialogue(this.Helper.Translation.Get("dialogbox.wateringCanQuestion"), choices.ToArray(), new GameLocation.afterQuestionBehavior(DialogueSetWateringCan));
             }
         }
 
-        /// <summary>Display a dialogue window to the player. Content depending on the level of the watering can.</summary>
-        /// <param name="upgradeLevel">Currect watering can upgrade level.</param>
-        private void SelectionOpen(){
-            int upgradeLevel=Game1.player.CurrentTool.UpgradeLevel;
+        /// <summary>Button change action for hoe mod.</summary>
+        private void HoeButtonAction(){
+            if(this.Config.HoeAlwaysHighestOption && !this.Config.HoeSelectTemporary){
+                return;
+            }
+
+            SButtonState state = this.Helper.Input.GetState(this.Config.SelectionOpenKey);
+            if(state==SButtonState.Released){
+                if(this.Config.HoeAlwaysHighestOption && this.Config.HoeSelectTemporary){
+                    this.hoeTimerCounter=this.Config.TimerStart;
+                }
+                List<Response> choices=ChoicesBuilder(this.Data.HoeSelectedOption);
+                Game1.currentLocation.createQuestionDialogue(this.Helper.Translation.Get("dialogbox.hoeQuestion"), choices.ToArray(), new GameLocation.afterQuestionBehavior(DialogueSetHoe));
+            }
+        }
+
+        /// <summary>Build response list for question dialogue.</summary>
+        /// /// <param name="selectedOption">The selected option for actual tool.</param>
+        private List<Response> ChoicesBuilder(int selectedOption){
             List<Response> choices = new List<Response>();
             string selectionText=this.Helper.Translation.Get("dialogbox.currentOption");
-            for(int i=0;i<Math.Min(upgradeLevel+1,5);i++){
+            for(int i=0;i<=GetMaximumSelectableOptionValue();i++){
                 string responseKey=$"{i}";
                 string responseText=this.Helper.Translation.Get($"dialogbox.option{i}");
-                choices.Add(new Response(responseKey,responseText+(this.Data.SelectedOption==i?$" --- {selectionText} ---":"")));
+                choices.Add(new Response(responseKey,responseText+(selectedOption==i?$" --- {selectionText} ---":"")));
             }
-            if(String.Equals(Game1.player.CurrentTool.enchantments.ToString(),$"StardewValley.Enchantments.ReachingToolEnchantment")){
-                string responseText=this.Helper.Translation.Get($"dialogbox.option5");
-                choices.Add(new Response("5",responseText+(this.Data.SelectedOption==5?$" --- {selectionText} ---":"")));
-            }
-            Game1.currentLocation.createQuestionDialogue(this.Helper.Translation.Get("dialogbox.question"), choices.ToArray(), new GameLocation.afterQuestionBehavior(DialogueSet));
+            return choices;
         }
 
-        /// <summary>Save the selected option after dialogbox closed.</summary>
+        /// <summary>Determine which is the maximum seletable option value with the current Watering Can.</summary>
+        private int GetMaximumSelectableOptionValue(){
+            int upgradeLevel=Game1.player.CurrentTool.UpgradeLevel;
+            bool isHaveReachingEnchantment=String.Equals(Game1.player.CurrentTool.enchantments.ToString(),$"StardewValley.Enchantments.ReachingToolEnchantment");
+            switch(upgradeLevel){
+                case 0:
+                case 1:
+                case 2:
+                case 3: return upgradeLevel;
+                case 4: 
+                        if(isHaveReachingEnchantment){
+                            return 5;
+                        }
+                        return 4;
+                default: return 0;
+            }
+        }
+
+        /// <summary>Save the selected option for watering can after dialogbox closed.</summary>
         /// <param name="who">Actual farmer.</param>
         /// <param name="selectedOption">Selected option.</param>
-        private void DialogueSet(Farmer who, string selectedOption){
-            this.Data.SelectedOption=int.Parse(selectedOption);
+        private void DialogueSetWateringCan(Farmer who, string selectedOption){
+            this.Data.WateringCanSelectedOption=int.Parse(selectedOption);
+            this.dataChanged=true;
+        }
+
+        /// <summary>Save the selected option for hoe after dialogbox closed.</summary>
+        /// <param name="who">Actual farmer.</param>
+        /// <param name="selectedOption">Selected option.</param>
+        private void DialogueSetHoe(Farmer who, string selectedOption){
+            this.Data.HoeSelectedOption=int.Parse(selectedOption);
             this.dataChanged=true;
         }
 

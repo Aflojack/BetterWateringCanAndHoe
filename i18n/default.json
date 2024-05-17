@@ -1,5 +1,6 @@
 { 
-    "dialogbox.question": "How should I use my watering can?",
+    "dialogbox.wateringCanQuestion": "How should I use my watering wan?",
+    "dialogbox.hoeQuestion": "How should I use my hoe?",
     "dialogbox.option0": "Tile (1)",
     "dialogbox.option1": "Row (3)",
     "dialogbox.option2": "Row (5)",
@@ -7,8 +8,14 @@
     "dialogbox.option4": "Rectangle (6x3)",
     "dialogbox.option5": "Square (5x5)",
     "dialogbox.currentOption": "Current",
+    "configMenu.wateringCan.title": "Better Watering Can",
+    "configMenu.hoe.title": "Better Hoe",
     "configMenu.enabled.name": "Enabled",
     "configMenu.enabled.tooltip": "Enable or disable the mod function.",
     "configMenu.selectionOpenKey.name": "Open selection menu",
-    "configMenu.selectionOpenKey.tooltip": "Bind key for open selection menu."
+    "configMenu.selectionOpenKey.tooltip": "Bind key for open selection menu.",
+    "configMenu.alwaysHighestOption.name": "Always highest option",
+    "configMenu.alwaysHighestOption.tooltip": "If this setting is checked then it will automatically select highest options for your tool. (You cannot open selection menu if this option activated only)",
+    "configMenu.selectTemporary.name": "Select only temporary",
+    "configMenu.selectTemporary.tooltip": "If this setting is checked then you can open the selection menu but your selected option only will remain for ~60 second before the highest option will be restored."
 }

@@ -1,3 +1,4 @@
 class ModData{
-   public int SelectedOption { get; set; } = 0;
+   public int WateringCanSelectedOption { get; set; } = 0;
+   public int HoeSelectedOption { get; set; } = 0;
 }

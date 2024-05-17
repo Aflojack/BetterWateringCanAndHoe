@@ -1,5 +1,6 @@
 {
     "dialogbox.question": "Hogyan használjam az öntözőkannám?",
+    "dialogbox.hoeQuestion": "Hogyan használjam a kapámat",
     "dialogbox.option0": "Mező (1)",
     "dialogbox.option1": "Sor (3)",
     "dialogbox.option2": "Sor (5)",
@@ -7,8 +8,14 @@
     "dialogbox.option4": "Téglalap (6x3)",
     "dialogbox.option5": "Négyzet (5x5)",
     "dialogbox.currentOption": "Jelenlegi",
+    "configMenu.wateringCan.title": "Jobb öntözőkanna",
+    "configMenu.hoe.title": "Jobb kapa",
     "configMenu.enabled.name": "Bekapcsolva",
     "configMenu.enabled.tooltip": "Kiegészítő funkcióinak be- és kikapcsolása.",
     "configMenu.selectionOpenKey.name": "Választó menü megnyitás",
-    "configMenu.selectionOpenKey.tooltip": "Beállítható gomb a választó menü megnyitásához."
+    "configMenu.selectionOpenKey.tooltip": "Beállítható gomb a választó menü megnyitásához.",
+    "configMenu.alwaysHighestOption.name": "Mindig a legnagyobb opció választása",
+    "configMenu.alwaysHighestOption.tooltip": "Ha ez a beállítás be van jelölve, akkor a mod automatikusan a legnagyobb elérhető opciót választja a jelenlegi öntözőkannához. (Ha ez aktív, akkor nem tudod használni a választó menüt)",
+    "configMenu.selectTemporary.name": "Választás átmenetileg",
+    "configMenu.selectTemporary.tooltip": "Csak akkor használható, ha 'Mindig a legnagyobb opció választása' is ki van választva. Ha ez a beállítás be van jelölve, akkor tudsz választani a választó menüből és átmenetileg használni is a kiválasztott módot (ami ~60 másodperc, ha nem nyitod meg újra a választó menüt). Miután az visszaszámláló lejárt visszaáll a legnagyobb elérhető opcióra. Ez a beállítás azoknak van, akik ritkán, de használni szeretnék a kisebb opciókat is."
 }
