@@ -7,11 +7,29 @@ public sealed class GardenToolManager {
     /*********
      ** Properties
      *********/
+    /// <summary>
+    /// Variable if mod is enabled or disabled.
+    /// </summary>
     private readonly bool _enable;
+    /// <summary>
+    /// Variable if mod need to automatically select highest option.
+    /// </summary>
     private readonly bool _alwaysHighest;
+    /// <summary>
+    /// Variable if mod need to allow temporary selection.
+    /// </summary>
     private readonly bool _selectTemporary;
+    /// <summary>
+    /// Reset value for timer.
+    /// </summary>
     private readonly int _timerStartValue;
+    /// <summary>
+    /// Actual garden tool.
+    /// </summary>
     private readonly GardenTool _gardenTool;
+    /// <summary>
+    /// Variable for timer.
+    /// </summary>
     private int _timer;
 
     public GardenToolManager(bool enable, bool alwaysHighest, bool selectTemporary, GardenTool gardenTool, int timerStartValue){
@@ -25,6 +43,20 @@ public sealed class GardenToolManager {
     /**********
      ** Public methods
      *********/
+    /// <summary>
+    /// Getter and setter for DataChange property.
+    /// </summary>
+    public bool DataChange{
+        get => _gardenTool.DataChanged;
+        set => _gardenTool.DataChanged = value;
+    }
+
+    /// <summary>
+    /// Getter for SelectedOption property.
+    /// </summary>
+    public int SelectedOption{
+        get => _gardenTool.SelectedOption;
+    }
     /// <summary>Button change action.</summary>
     public void ButtonAction(SButton state, IModHelper helper){
         if (!_enable)
@@ -46,7 +78,7 @@ public sealed class GardenToolManager {
                 string responseText=helper.Translation.Get($"dialogbox.option{i}");
                 choices.Add(new Response(responseKey,responseText+(_gardenTool.SelectedOption==i?$" --- {selectionText} ---":"")));
             }
-            Game1.currentLocation.createQuestionDialogue(helper.Translation.Get(_gardenTool.TranslationKey), choices.ToArray(), new GameLocation.afterQuestionBehavior(_gardenTool.DialogueSet));
+            Game1.currentLocation.createQuestionDialogue(helper.Translation.Get(_gardenTool.TranslationKey), choices.ToArray(), _gardenTool.DialogueSet);
         }
     }
     
@@ -64,30 +96,28 @@ public sealed class GardenToolManager {
         Game1.player.toolPower.Value=_gardenTool.SelectedOption;
     }
 
-    public bool DataChange(){
-        return _gardenTool.DataChanged;
-    }
-
-    public void DataChangeReset(){
-        _gardenTool.DataChanged = false;
-    }
-
-    public int SelectedOption(){
-        return _gardenTool.SelectedOption;
-    }
-
     /**********
      ** Private methods
      *********/
+    /// <summary>
+    /// Reset the timer with _timerStartValue.
+    /// </summary>
     private void TimerReset(){
         _timer = _timerStartValue;
     }
 
+    /// <summary>
+    /// If the timer is not zero then it will continue countdown.
+    /// </summary>
     private void TimerTick(){
         if (_timer != 0)
             _timer--;
     }
 
+    /// <summary>
+    /// Check if the timer is ended.
+    /// </summary>
+    /// <returns>If the timer ended (_timer==0)</returns>
     private bool TimerEnded(){
         return _timer == 0;
     }

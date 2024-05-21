@@ -7,10 +7,25 @@ public sealed class GardenTool{
     /*********
      ** Properties
      *********/
+    /// <summary>
+    /// Stored TraslationKey for get text through i18n.
+    /// </summary>
     private readonly string _translationKey;
+    /// <summary>
+    /// Actual garden tool upgrade level.
+    /// </summary>
     private int _upgradeLevel;
+    /// <summary>
+    /// Actual garden tool if it has reaching enchantment.
+    /// </summary>
     private bool _hasReachingEnchantment;
+    /// <summary>
+    /// Variable if selected mode is actually changed.
+    /// </summary>
     private bool _dataChanged;
+    /// <summary>
+    /// Current selected option.
+    /// </summary>
     private int _selectedOption;
 
     public GardenTool(string translationKey, int selectedOption){
@@ -21,6 +36,9 @@ public sealed class GardenTool{
     /**********
      ** Public methods
      *********/
+    /// <summary>
+    /// Getter and setter for _selectedOption.
+    /// </summary>
     public int SelectedOption{
         get{ return _selectedOption; }
         set{
@@ -36,22 +54,32 @@ public sealed class GardenTool{
         }
     }
 
+    /// <summary>
+    /// Getter and setter for _dataChange.
+    /// </summary>
     public bool DataChanged{
         get => _dataChanged;
         set => _dataChanged = value;
     }
 
+    /// <summary>
+    /// Getter for _translationKey.
+    /// </summary>
     public string TranslationKey{
         get => _translationKey;
     }
 
+    /// <summary>
+    /// When it called it will refresh information of the garden tool.
+    /// </summary>
     public void Refresh(){
         _upgradeLevel = GetUpgradeLevel();
         _hasReachingEnchantment = HasReachingEnchantment();
         SelectedOption = _selectedOption;
     }
     
-    /// <summary>Determine which is the maximum selectable option value with the current Watering Can.</summary>
+    /// <summary>Determine which is the maximum selectable option value with the current upgradeLevel and enchangement.</summary>
+    /// <returns>Maximum selectable option.</returns>
     public int GetMaximumSelectableOptionValue(){
         switch(_upgradeLevel){
             case 0:
@@ -74,10 +102,18 @@ public sealed class GardenTool{
     /**********
      ** Private methods
      *********/
+    /// <summary>
+    /// Queries the current upgradeLevel from the game.
+    /// </summary>
+    /// <returns>Currect tool upgradeLevel.</returns>
     private static int GetUpgradeLevel(){
         return Game1.player.CurrentTool.UpgradeLevel;
     }
 
+    /// <summary>
+    /// Queries the current enchantment if it is Reaching from the game.
+    /// </summary>
+    /// <returns>If the tool has reaching enchantment.</returns>
     private static bool HasReachingEnchantment(){
         return string.Equals(Game1.player.CurrentTool.enchantments.ToString(), $"StardewValley.Enchantments.ReachingToolEnchantment");
     }

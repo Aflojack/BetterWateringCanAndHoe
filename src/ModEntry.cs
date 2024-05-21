@@ -186,16 +186,16 @@ namespace BetterWateringCanAndHoe{
 
         /// <summary>Write current player mod data json to data folder if that necessary.</summary>
         private void ModDataWrite(){
-            if (!BetterWateringCanManager.DataChange() && !BetterHoeManager.DataChange())
+            if (!BetterWateringCanManager.DataChange && !BetterHoeManager.DataChange)
                 return;
 
-            Data.WateringCanSelectedOption = BetterWateringCanManager.SelectedOption();
-            Data.HoeSelectedOption = BetterHoeManager.SelectedOption();
+            Data.WateringCanSelectedOption = BetterWateringCanManager.SelectedOption;
+            Data.HoeSelectedOption = BetterHoeManager.SelectedOption;
             
             Helper.Data.WriteJsonFile($"data/{Constants.SaveFolderName}.json", Data);
-            
-            BetterWateringCanManager.DataChangeReset();
-            BetterHoeManager.DataChangeReset();
+
+            BetterWateringCanManager.DataChange = false;
+            BetterHoeManager.DataChange = false;
         }
     }
 }
