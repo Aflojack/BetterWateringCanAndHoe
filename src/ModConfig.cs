@@ -8,5 +8,6 @@ class ModConfig{
    public bool HoeAlwaysHighestOption { get; set; } = false;
    public bool WateringCanSelectTemporary { get; set; } = false;
    public bool HoeSelectTemporary { get; set; } = false;
-   public int TimerStart { get; set; } = 3600;
+   public int WateringCanTimerStart { get; set; } = 3600;
+   public int HoeTimerStart { get; set; } = 3600;
 }

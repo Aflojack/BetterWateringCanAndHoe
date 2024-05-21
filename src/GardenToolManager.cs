@@ -57,7 +57,9 @@ public sealed class GardenToolManager {
     public int SelectedOption{
         get => _gardenTool.SelectedOption;
     }
-    /// <summary>Button change action.</summary>
+    /// <summary>
+    /// Button change action.
+    /// </summary>
     public void ButtonAction(SButton state, IModHelper helper){
         if (!_enable)
             return;
@@ -82,18 +84,26 @@ public sealed class GardenToolManager {
         }
     }
     
-    /// <summary>Tick method for watering can mod.</summary>
+    /// <summary>
+    /// Tick method for garden tool.
+    /// </summary>
     public void Tick(){
         _gardenTool.Refresh();
         
         if(_alwaysHighest){
-            if(_selectTemporary && !TimerEnded()){
-                TimerTick();
-            }else{
+            if(!_selectTemporary || (_selectTemporary && TimerEnded())){
                 _gardenTool.SelectedOption = _gardenTool.GetMaximumSelectableOptionValue();
             }
         }
         Game1.player.toolPower.Value=_gardenTool.SelectedOption;
+    }
+    
+    /// <summary>
+    /// If the timer is not zero then it will continue countdown.
+    /// </summary>
+    public void TimerTick(){
+        if (_timer != 0)
+            _timer--;
     }
 
     /**********
@@ -104,14 +114,6 @@ public sealed class GardenToolManager {
     /// </summary>
     private void TimerReset(){
         _timer = _timerStartValue;
-    }
-
-    /// <summary>
-    /// If the timer is not zero then it will continue countdown.
-    /// </summary>
-    private void TimerTick(){
-        if (_timer != 0)
-            _timer--;
     }
 
     /// <summary>

@@ -92,7 +92,7 @@ public sealed class GardenTool{
         }
     }
     
-    /// <summary>Save the selected option for watering can after dialogbox closed.</summary>
+    /// <summary>Save the selected option for tool after dialog closed.</summary>
     /// <param name="who">Actual farmer.</param>
     /// <param name="selectedOption">Selected option.</param>
     public void DialogueSet(Farmer who, string selectedOption){
@@ -105,7 +105,7 @@ public sealed class GardenTool{
     /// <summary>
     /// Queries the current upgradeLevel from the game.
     /// </summary>
-    /// <returns>Currect tool upgradeLevel.</returns>
+    /// <returns>Current tool upgradeLevel.</returns>
     private static int GetUpgradeLevel(){
         return Game1.player.CurrentTool.UpgradeLevel;
     }

@@ -47,13 +47,13 @@ namespace BetterWateringCanAndHoe{
                     Config.HoeAlwaysHighestOption, 
                     Config.HoeSelectTemporary, 
                     new GardenTool("dialogbox.hoeQuestion", Data.HoeSelectedOption), 
-                    Config.TimerStart);
+                    Config.HoeTimerStart);
                 BetterWateringCanManager = new GardenToolManager(
                     Config.BetterWateringCanModEnabled, 
                     Config.WateringCanAlwaysHighestOption, 
                     Config.WateringCanSelectTemporary, 
                     new GardenTool("dialogbox.wateringCanQuestion", Data.WateringCanSelectedOption), 
-                    Config.TimerStart);
+                    Config.WateringCanTimerStart);
             }
         }
         
@@ -107,6 +107,17 @@ namespace BetterWateringCanAndHoe{
                 getValue: () => Config.WateringCanSelectTemporary,
                 setValue: value => Config.WateringCanSelectTemporary = value
             );
+            
+            configMenu.AddNumberOption(
+                mod: ModManifest,
+                name: () => Helper.Translation.Get("configMenu.selectTemporaryTimer.name"),
+                tooltip: () => Helper.Translation.Get("configMenu.selectTemporaryTimer.tooltip"),
+                getValue: () => Config.WateringCanTimerStart/60,
+                setValue: value => Config.WateringCanTimerStart = value*60,
+                min: 10,
+                max: 90,
+                interval: 1
+            );
 
             configMenu.AddSectionTitle(
                 mod: ModManifest,
@@ -136,6 +147,17 @@ namespace BetterWateringCanAndHoe{
                 getValue: () => Config.HoeSelectTemporary,
                 setValue: value => Config.HoeSelectTemporary = value
             );
+            
+            configMenu.AddNumberOption(
+                mod: ModManifest,
+                name: () => Helper.Translation.Get("configMenu.selectTemporaryTimer.name"),
+                tooltip: () => Helper.Translation.Get("configMenu.selectTemporaryTimer.tooltip"),
+                getValue: () => Config.HoeTimerStart/60,
+                setValue: value => Config.HoeTimerStart = value*60,
+                min: 10,
+                max: 90,
+                interval: 1
+            );
         }
 
         /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
@@ -145,6 +167,9 @@ namespace BetterWateringCanAndHoe{
             if (!Context.IsWorldReady)
                 return;
 
+            BetterWateringCanManager.TimerTick();
+            BetterHoeManager.TimerTick();
+            
             switch (Game1.player.CurrentTool){
                 case WateringCan:
                     BetterWateringCanManager.Tick();
