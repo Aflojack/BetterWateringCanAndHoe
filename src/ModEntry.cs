@@ -9,18 +9,16 @@ namespace BetterWateringCanAndHoe{
     internal sealed class ModEntry : Mod{
     
     /*********
-    ** Properties
+    ** Fields
     *********/
     /// <summary>The mod configuration from the player.</summary>
     private ModConfig Config;
     /// <summary>The mod data from the player.</summary>
     private ModData Data;
-    /// <summary>Bool value for data change detection.</summary>
-    private bool dataChanged;
-    /// <summary>Timer for Watering Can SelectTemporary setting.</summary>
-    private int wateringCanTimerCounter=0;
-    /// <summary>Timer for Hoe SelectTemporary setting.</summary>
-    private int hoeTimerCounter=0;
+    /// <summary>Manager class for Better Hoe mod.</summary>
+    private GardenToolManager BetterHoeManager;
+    /// <summary>Manager class for Better Watering Can mod.</summary>
+    private GardenToolManager BetterWateringCanManager;
     
         /**********
         ** Public methods
@@ -28,102 +26,135 @@ namespace BetterWateringCanAndHoe{
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper){
-            this.Config = this.Helper.ReadConfig<ModConfig>();
-            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
-            helper.Events.GameLoop.DayStarted += this.OnDayStarted;
-            helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
-            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
+            Config = Helper.ReadConfig<ModConfig>();
+            helper.Events.GameLoop.GameLaunched += OnGameLaunched;
+            helper.Events.GameLoop.SaveLoaded += OnSaveLoaded;
+            helper.Events.Input.ButtonsChanged += OnButtonsChanged;
+            helper.Events.GameLoop.UpdateTicked += OnUpdateTicked;
         }
 
         /**********
         ** Private methods
         *********/
-        /// <summary>Raised when the day started.</summary>
+        /// <summary>Raised when the save file loaded.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
-        private void OnDayStarted(object? sender, DayStartedEventArgs e){
-            if(this.Data is null)
-                ModDataLoad();
+        private void OnSaveLoaded(object? sender, SaveLoadedEventArgs e){
+            ModDataLoad();
+            BetterHoeManager = new GardenToolManager(
+                Config.BetterHoeModEnabled, 
+                Config.HoeAlwaysHighestOption, 
+                Config.HoeSelectTemporary, 
+                new GardenTool("dialogbox.hoeQuestion", Data.HoeSelectedOption), 
+                Config.HoeTimerStart);
+            BetterWateringCanManager = new GardenToolManager(
+                Config.BetterWateringCanModEnabled, 
+                Config.WateringCanAlwaysHighestOption, 
+                Config.WateringCanSelectTemporary, 
+                new GardenTool("dialogbox.wateringCanQuestion", Data.WateringCanSelectedOption), 
+                Config.WateringCanTimerStart);
         }
         
         /// <summary>Raised when the game launched. Function to build config with GenericModConfigMenu.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
         private void OnGameLaunched(object? sender, GameLaunchedEventArgs e){
-            var configMenu = this.Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
+            var configMenu = Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
             if (configMenu is null)
                 return;
 
             configMenu.Register(
-                mod: this.ModManifest,
-                reset: () => this.Config = new ModConfig(),
-                save: () => this.Helper.WriteConfig(this.Config)
+                mod: ModManifest,
+                reset: () => Config = new ModConfig(),
+                save: () => Helper.WriteConfig(Config)
             );
 
             configMenu.AddKeybind(
-                mod: this.ModManifest,
-                name: () => this.Helper.Translation.Get("configMenu.selectionOpenKey.name"),
-                tooltip: () => this.Helper.Translation.Get("configMenu.selectionOpenKey.tooltip"),
-                getValue: () => this.Config.SelectionOpenKey,
-                setValue: value => this.Config.SelectionOpenKey = value
+                mod: ModManifest,
+                name: () => Helper.Translation.Get("configMenu.selectionOpenKey.name"),
+                tooltip: () => Helper.Translation.Get("configMenu.selectionOpenKey.tooltip"),
+                getValue: () => Config.SelectionOpenKey,
+                setValue: value => Config.SelectionOpenKey = value
             );
 
             configMenu.AddSectionTitle(
-                mod: this.ModManifest,
-                text: () => this.Helper.Translation.Get("configMenu.wateringCan.title")
+                mod: ModManifest,
+                text: () => Helper.Translation.Get("configMenu.wateringCan.title")
             );
 
             configMenu.AddBoolOption(
-                mod: this.ModManifest,
-                name: () => this.Helper.Translation.Get("configMenu.enabled.name"),
-                tooltip: () => this.Helper.Translation.Get("configMenu.enabled.tooltip"),
-                getValue: () => this.Config.BetterWateringCanModEnabled,
-                setValue: value => this.Config.BetterWateringCanModEnabled = value
+                mod: ModManifest,
+                name: () => Helper.Translation.Get("configMenu.enabled.name"),
+                tooltip: () => Helper.Translation.Get("configMenu.enabled.tooltip"),
+                getValue: () => Config.BetterWateringCanModEnabled,
+                setValue: value => Config.BetterWateringCanModEnabled = value
             );
 
             configMenu.AddBoolOption(
-                mod: this.ModManifest,
-                name: () => this.Helper.Translation.Get("configMenu.alwaysHighestOption.name"),
-                tooltip: () => this.Helper.Translation.Get("configMenu.alwaysHighestOption.tooltip"),
-                getValue: () => this.Config.WateringCanAlwaysHighestOption,
-                setValue: value => this.Config.WateringCanAlwaysHighestOption = value
+                mod: ModManifest,
+                name: () => Helper.Translation.Get("configMenu.alwaysHighestOption.name"),
+                tooltip: () => Helper.Translation.Get("configMenu.alwaysHighestOption.tooltip"),
+                getValue: () => Config.WateringCanAlwaysHighestOption,
+                setValue: value => Config.WateringCanAlwaysHighestOption = value
             );
 
             configMenu.AddBoolOption(
-                mod: this.ModManifest,
-                name: () => this.Helper.Translation.Get("configMenu.selectTemporary.name"),
-                tooltip: () => this.Helper.Translation.Get("configMenu.selectTemporary.tooltip"),
-                getValue: () => this.Config.WateringCanSelectTemporary,
-                setValue: value => this.Config.WateringCanSelectTemporary = value
+                mod: ModManifest,
+                name: () => Helper.Translation.Get("configMenu.selectTemporary.name"),
+                tooltip: () => Helper.Translation.Get("configMenu.selectTemporary.tooltip"),
+                getValue: () => Config.WateringCanSelectTemporary,
+                setValue: value => Config.WateringCanSelectTemporary = value
+            );
+            
+            configMenu.AddNumberOption(
+                mod: ModManifest,
+                name: () => Helper.Translation.Get("configMenu.selectTemporaryTimer.name"),
+                tooltip: () => Helper.Translation.Get("configMenu.selectTemporaryTimer.tooltip"),
+                getValue: () => Config.WateringCanTimerStart/60,
+                setValue: value => Config.WateringCanTimerStart = value*60,
+                min: 10,
+                max: 90,
+                interval: 1
             );
 
             configMenu.AddSectionTitle(
-                mod: this.ModManifest,
-                text: () => this.Helper.Translation.Get("configMenu.hoe.title")
+                mod: ModManifest,
+                text: () => Helper.Translation.Get("configMenu.hoe.title")
             );
 
             configMenu.AddBoolOption(
-                mod: this.ModManifest,
-                name: () => this.Helper.Translation.Get("configMenu.enabled.name"),
-                tooltip: () => this.Helper.Translation.Get("configMenu.enabled.tooltip"),
-                getValue: () => this.Config.BetterHoeModEnabled,
-                setValue: value => this.Config.BetterHoeModEnabled = value
+                mod: ModManifest,
+                name: () => Helper.Translation.Get("configMenu.enabled.name"),
+                tooltip: () => Helper.Translation.Get("configMenu.enabled.tooltip"),
+                getValue: () => Config.BetterHoeModEnabled,
+                setValue: value => Config.BetterHoeModEnabled = value
             );
 
             configMenu.AddBoolOption(
-                mod: this.ModManifest,
-                name: () => this.Helper.Translation.Get("configMenu.alwaysHighestOption.name"),
-                tooltip: () => this.Helper.Translation.Get("configMenu.alwaysHighestOption.tooltip"),
-                getValue: () => this.Config.HoeAlwaysHighestOption,
-                setValue: value => this.Config.HoeAlwaysHighestOption = value
+                mod: ModManifest,
+                name: () => Helper.Translation.Get("configMenu.alwaysHighestOption.name"),
+                tooltip: () => Helper.Translation.Get("configMenu.alwaysHighestOption.tooltip"),
+                getValue: () => Config.HoeAlwaysHighestOption,
+                setValue: value => Config.HoeAlwaysHighestOption = value
             );
 
             configMenu.AddBoolOption(
-                mod: this.ModManifest,
-                name: () => this.Helper.Translation.Get("configMenu.selectTemporary.name"),
-                tooltip: () => this.Helper.Translation.Get("configMenu.selectTemporary.tooltip"),
-                getValue: () => this.Config.HoeSelectTemporary,
-                setValue: value => this.Config.HoeSelectTemporary = value
+                mod: ModManifest,
+                name: () => Helper.Translation.Get("configMenu.selectTemporary.name"),
+                tooltip: () => Helper.Translation.Get("configMenu.selectTemporary.tooltip"),
+                getValue: () => Config.HoeSelectTemporary,
+                setValue: value => Config.HoeSelectTemporary = value
+            );
+            
+            configMenu.AddNumberOption(
+                mod: ModManifest,
+                name: () => Helper.Translation.Get("configMenu.selectTemporaryTimer.name"),
+                tooltip: () => Helper.Translation.Get("configMenu.selectTemporaryTimer.tooltip"),
+                getValue: () => Config.HoeTimerStart/60,
+                setValue: value => Config.HoeTimerStart = value*60,
+                min: 10,
+                max: 90,
+                interval: 1
             );
         }
 
@@ -134,63 +165,19 @@ namespace BetterWateringCanAndHoe{
             if (!Context.IsWorldReady)
                 return;
 
-            if(this.Config.BetterWateringCanModEnabled && Game1.player.CurrentTool is WateringCan){
-                WateringCanModTick();
-                return;
+            BetterWateringCanManager.TimerTick();
+            BetterHoeManager.TimerTick();
+            
+            switch (Game1.player.CurrentTool){
+                case WateringCan:
+                    BetterWateringCanManager.Tick();
+                    break;
+                case Hoe:
+                    BetterHoeManager.Tick();
+                    break;
             }
-
-            if(this.Config.BetterHoeModEnabled && Game1.player.CurrentTool is Hoe){
-                HoeModTick();
-                return;
-            }
-        }
-
-        /// <summary>Tick method for watering can mod.</summary>
-        private void WateringCanModTick(){
-            if(this.Data.WateringCanSelectedOption>GetMaximumSelectableOptionValue() || this.Data.WateringCanSelectedOption<0){
-                this.Data.WateringCanSelectedOption=0;
-                this.dataChanged=true;
-            }
-
-            if(this.Config.WateringCanAlwaysHighestOption){
-                int highestOption=this.GetMaximumSelectableOptionValue();
-                if(this.Config.WateringCanSelectTemporary && wateringCanTimerCounter!=0){
-                    wateringCanTimerCounter--;
-                }else if(this.Data.WateringCanSelectedOption!=highestOption){
-                    this.Data.WateringCanSelectedOption=highestOption;
-                    this.dataChanged=true;
-                }
-            }
-
-            if(dataChanged){
-                ModDataWrite();
-            }
-
-            Game1.player.toolPower.Value=this.Data.WateringCanSelectedOption;
-        }
-
-        /// <summary>Tick method for hoe mod.</summary>
-        private void HoeModTick(){
-            if(this.Data.HoeSelectedOption>GetMaximumSelectableOptionValue() || this.Data.HoeSelectedOption<0){
-                this.Data.HoeSelectedOption=0;
-                this.dataChanged=true;
-            }
-
-            if(this.Config.HoeAlwaysHighestOption){
-                int highestOption=this.GetMaximumSelectableOptionValue();
-                if(this.Config.HoeSelectTemporary && hoeTimerCounter!=0){
-                    hoeTimerCounter--;
-                }else if(this.Data.HoeSelectedOption!=highestOption){
-                    this.Data.HoeSelectedOption=highestOption;
-                    this.dataChanged=true;
-                }
-            }
-
-            if(dataChanged){
-                ModDataWrite();
-            }
-
-            Game1.player.toolPower.Value=this.Data.HoeSelectedOption;
+            
+            ModDataWrite();
         }
 
         /// <summary>Raised after the player pressed/released any buttons on the keyboard, mouse, or controller.</summary>
@@ -202,107 +189,39 @@ namespace BetterWateringCanAndHoe{
 
             if (Game1.player.IsBusyDoingSomething())
                 return;
-
-            if (this.Config.BetterWateringCanModEnabled && Game1.player.CurrentTool is WateringCan){
-                WateringCanButtonAction();
+            
+            if (Helper.Input.GetState(Config.SelectionOpenKey) != SButtonState.Released)
                 return;
-            }
 
-            if (this.Config.BetterHoeModEnabled && Game1.player.CurrentTool is Hoe){
-                HoeButtonAction();
-                return;
+            switch (Game1.player.CurrentTool){
+                case WateringCan:
+                    BetterWateringCanManager.ButtonAction(Helper);
+                    break;
+                case Hoe:
+                    BetterHoeManager.ButtonAction(Helper);
+                    break;
             }
+            
+            ModDataWrite();
         }
 
-        /// <summary>Button change action for watering can mod.</summary>
-        private void WateringCanButtonAction(){
-            if(this.Config.WateringCanAlwaysHighestOption && !this.Config.WateringCanSelectTemporary){
-                return;
-            }
-
-            SButtonState state = this.Helper.Input.GetState(this.Config.SelectionOpenKey);
-            if(state==SButtonState.Released){
-                if(this.Config.WateringCanAlwaysHighestOption && this.Config.WateringCanSelectTemporary){
-                    this.wateringCanTimerCounter=this.Config.TimerStart;
-                }
-                List<Response> choices=ChoicesBuilder(this.Data.WateringCanSelectedOption);
-                Game1.currentLocation.createQuestionDialogue(this.Helper.Translation.Get("dialogbox.wateringCanQuestion"), choices.ToArray(), new GameLocation.afterQuestionBehavior(DialogueSetWateringCan));
-            }
-        }
-
-        /// <summary>Button change action for hoe mod.</summary>
-        private void HoeButtonAction(){
-            if(this.Config.HoeAlwaysHighestOption && !this.Config.HoeSelectTemporary){
-                return;
-            }
-
-            SButtonState state = this.Helper.Input.GetState(this.Config.SelectionOpenKey);
-            if(state==SButtonState.Released){
-                if(this.Config.HoeAlwaysHighestOption && this.Config.HoeSelectTemporary){
-                    this.hoeTimerCounter=this.Config.TimerStart;
-                }
-                List<Response> choices=ChoicesBuilder(this.Data.HoeSelectedOption);
-                Game1.currentLocation.createQuestionDialogue(this.Helper.Translation.Get("dialogbox.hoeQuestion"), choices.ToArray(), new GameLocation.afterQuestionBehavior(DialogueSetHoe));
-            }
-        }
-
-        /// <summary>Build response list for question dialogue.</summary>
-        /// /// <param name="selectedOption">The selected option for actual tool.</param>
-        private List<Response> ChoicesBuilder(int selectedOption){
-            List<Response> choices = new List<Response>();
-            string selectionText=this.Helper.Translation.Get("dialogbox.currentOption");
-            for(int i=0;i<=GetMaximumSelectableOptionValue();i++){
-                string responseKey=$"{i}";
-                string responseText=this.Helper.Translation.Get($"dialogbox.option{i}");
-                choices.Add(new Response(responseKey,responseText+(selectedOption==i?$" --- {selectionText} ---":"")));
-            }
-            return choices;
-        }
-
-        /// <summary>Determine which is the maximum seletable option value with the current Watering Can.</summary>
-        private int GetMaximumSelectableOptionValue(){
-            int upgradeLevel=Game1.player.CurrentTool.UpgradeLevel;
-            bool isHaveReachingEnchantment=String.Equals(Game1.player.CurrentTool.enchantments.ToString(),$"StardewValley.Enchantments.ReachingToolEnchantment");
-            switch(upgradeLevel){
-                case 0:
-                case 1:
-                case 2:
-                case 3: return upgradeLevel;
-                case 4: 
-                        if(isHaveReachingEnchantment){
-                            return 5;
-                        }
-                        return 4;
-                default: return 0;
-            }
-        }
-
-        /// <summary>Save the selected option for watering can after dialogbox closed.</summary>
-        /// <param name="who">Actual farmer.</param>
-        /// <param name="selectedOption">Selected option.</param>
-        private void DialogueSetWateringCan(Farmer who, string selectedOption){
-            this.Data.WateringCanSelectedOption=int.Parse(selectedOption);
-            this.dataChanged=true;
-        }
-
-        /// <summary>Save the selected option for hoe after dialogbox closed.</summary>
-        /// <param name="who">Actual farmer.</param>
-        /// <param name="selectedOption">Selected option.</param>
-        private void DialogueSetHoe(Farmer who, string selectedOption){
-            this.Data.HoeSelectedOption=int.Parse(selectedOption);
-            this.dataChanged=true;
-        }
-
-        /// <summary>Load currect player mod data json from data folder.</summary>
+        /// <summary>Load current player mod data json from data folder.</summary>
         private void ModDataLoad(){
-            this.Data = this.Helper.Data.ReadJsonFile<ModData>($"data/{StardewModdingAPI.Constants.SaveFolderName}.json") ?? new ModData();
-            this.dataChanged=false;
+            Data = Helper.Data.ReadJsonFile<ModData>($"data/{Constants.SaveFolderName}.json") ?? new ModData();
         }
 
-        /// <summary>Write currect player mod data json to data folder.</summary>
+        /// <summary>Write current player mod data json to data folder if that necessary.</summary>
         private void ModDataWrite(){
-            this.Helper.Data.WriteJsonFile($"data/{StardewModdingAPI.Constants.SaveFolderName}.json", this.Data);
-            this.dataChanged=false;
+            if (!BetterWateringCanManager.DataChange && !BetterHoeManager.DataChange)
+                return;
+
+            Data.WateringCanSelectedOption = BetterWateringCanManager.SelectedOption;
+            Data.HoeSelectedOption = BetterHoeManager.SelectedOption;
+            
+            Helper.Data.WriteJsonFile($"data/{Constants.SaveFolderName}.json", Data);
+
+            BetterWateringCanManager.DataChange = false;
+            BetterHoeManager.DataChange = false;
         }
     }
 }
