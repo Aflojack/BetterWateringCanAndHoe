@@ -88,7 +88,13 @@ public sealed class GardenToolManager {
     /// </summary>
     public void Tick(){
         _gardenTool.Refresh();
-
+        
+        if(_alwaysHighest){
+            if(!_selectTemporary || (_selectTemporary && TimerEnded())){
+                _gardenTool.SelectedOption = _gardenTool.GetMaximumSelectableOptionValue();
+            }
+        }
+        
         if (_gardenTool.UpgradeLevel==0 || _gardenTool.SelectedOption==0){
             Game1.player.toolPower.Value=0;
             if (!Game1.player.UsingTool){
@@ -101,12 +107,6 @@ public sealed class GardenToolManager {
             Game1.player.EndUsingTool();
             _animationEnded=false;
             return;
-        }
-        
-        if(_alwaysHighest){
-            if(!_selectTemporary || (_selectTemporary && TimerEnded())){
-                _gardenTool.SelectedOption = _gardenTool.GetMaximumSelectableOptionValue();
-            }
         }
 
         Game1.player.toolHold.Value=600;

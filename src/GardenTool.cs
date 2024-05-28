@@ -43,6 +43,7 @@ public sealed class GardenTool{
                 return;
             }
             _selectedOption = 0;
+            _dataChanged = true;
         }
     }
     
@@ -64,7 +65,7 @@ public sealed class GardenTool{
      *********/
     public GardenTool(string translationKey, int selectedOption){
         _translationKey = translationKey;
-        SelectedOption = selectedOption;
+        _selectedOption = selectedOption;
     }
     
     /// <summary>

@@ -28,7 +28,7 @@ namespace BetterWateringCanAndHoe{
         public override void Entry(IModHelper helper){
             Config = Helper.ReadConfig<ModConfig>();
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
-            helper.Events.GameLoop.DayStarted += OnDayStarted;
+            helper.Events.GameLoop.SaveLoaded += OnSaveLoaded;
             helper.Events.Input.ButtonsChanged += OnButtonsChanged;
             helper.Events.GameLoop.UpdateTicked += OnUpdateTicked;
         }
@@ -36,13 +36,10 @@ namespace BetterWateringCanAndHoe{
         /**********
         ** Private methods
         *********/
-        /// <summary>Raised when the day started.</summary>
+        /// <summary>Raised when the save file loaded.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
-        private void OnDayStarted(object? sender, DayStartedEventArgs e){
-            if (Data is not null)
-                return;
-            
+        private void OnSaveLoaded(object? sender, SaveLoadedEventArgs e){
             ModDataLoad();
             BetterHoeManager = new GardenToolManager(
                 Config.BetterHoeModEnabled, 
