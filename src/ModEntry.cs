@@ -9,7 +9,7 @@ namespace BetterWateringCanAndHoe{
     internal sealed class ModEntry : Mod{
     
     /*********
-    ** Properties
+    ** Fields
     *********/
     /// <summary>The mod configuration from the player.</summary>
     private ModConfig Config;
@@ -40,21 +40,22 @@ namespace BetterWateringCanAndHoe{
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
         private void OnDayStarted(object? sender, DayStartedEventArgs e){
-            if (Data is null){
-                ModDataLoad();
-                BetterHoeManager = new GardenToolManager(
-                    Config.BetterHoeModEnabled, 
-                    Config.HoeAlwaysHighestOption, 
-                    Config.HoeSelectTemporary, 
-                    new GardenTool("dialogbox.hoeQuestion", Data.HoeSelectedOption), 
-                    Config.HoeTimerStart);
-                BetterWateringCanManager = new GardenToolManager(
-                    Config.BetterWateringCanModEnabled, 
-                    Config.WateringCanAlwaysHighestOption, 
-                    Config.WateringCanSelectTemporary, 
-                    new GardenTool("dialogbox.wateringCanQuestion", Data.WateringCanSelectedOption), 
-                    Config.WateringCanTimerStart);
-            }
+            if (Data is not null)
+                return;
+            
+            ModDataLoad();
+            BetterHoeManager = new GardenToolManager(
+                Config.BetterHoeModEnabled, 
+                Config.HoeAlwaysHighestOption, 
+                Config.HoeSelectTemporary, 
+                new GardenTool("dialogbox.hoeQuestion", Data.HoeSelectedOption), 
+                Config.HoeTimerStart);
+            BetterWateringCanManager = new GardenToolManager(
+                Config.BetterWateringCanModEnabled, 
+                Config.WateringCanAlwaysHighestOption, 
+                Config.WateringCanSelectTemporary, 
+                new GardenTool("dialogbox.wateringCanQuestion", Data.WateringCanSelectedOption), 
+                Config.WateringCanTimerStart);
         }
         
         /// <summary>Raised when the game launched. Function to build config with GenericModConfigMenu.</summary>
@@ -191,13 +192,16 @@ namespace BetterWateringCanAndHoe{
 
             if (Game1.player.IsBusyDoingSomething())
                 return;
+            
+            if (Helper.Input.GetState(Config.SelectionOpenKey) != SButtonState.Released)
+                return;
 
             switch (Game1.player.CurrentTool){
                 case WateringCan:
-                    BetterWateringCanManager.ButtonAction(Config.SelectionOpenKey,Helper);
+                    BetterWateringCanManager.ButtonAction(Helper);
                     break;
                 case Hoe:
-                    BetterHoeManager.ButtonAction(Config.SelectionOpenKey,Helper);
+                    BetterHoeManager.ButtonAction(Helper);
                     break;
             }
             

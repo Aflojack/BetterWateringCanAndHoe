@@ -5,7 +5,7 @@ namespace BetterWateringCanAndHoe;
 
 public sealed class GardenTool{
     /*********
-     ** Properties
+     ** Fields
      *********/
     /// <summary>
     /// Stored TraslationKey for get text through i18n.
@@ -27,18 +27,10 @@ public sealed class GardenTool{
     /// Current selected option.
     /// </summary>
     private int _selectedOption;
-
-    public GardenTool(string translationKey, int selectedOption){
-        _translationKey = translationKey;
-        SelectedOption = selectedOption;
-    }
     
-    /**********
-     ** Public methods
+    /*********
+     ** Properties
      *********/
-    /// <summary>
-    /// Getter and setter for _selectedOption.
-    /// </summary>
     public int SelectedOption{
         get{ return _selectedOption; }
         set{
@@ -53,22 +45,28 @@ public sealed class GardenTool{
             _selectedOption = 0;
         }
     }
-
-    /// <summary>
-    /// Getter and setter for _dataChange.
-    /// </summary>
+    
+    public int UpgradeLevel{
+        get{ return _upgradeLevel; }
+    }
+    
     public bool DataChanged{
         get => _dataChanged;
         set => _dataChanged = value;
     }
-
-    /// <summary>
-    /// Getter for _translationKey.
-    /// </summary>
+    
     public string TranslationKey{
         get => _translationKey;
     }
-
+    
+    /**********
+     ** Public methods
+     *********/
+    public GardenTool(string translationKey, int selectedOption){
+        _translationKey = translationKey;
+        SelectedOption = selectedOption;
+    }
+    
     /// <summary>
     /// When it called it will refresh information of the garden tool.
     /// </summary>

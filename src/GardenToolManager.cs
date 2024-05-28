@@ -5,7 +5,7 @@ namespace BetterWateringCanAndHoe;
 
 public sealed class GardenToolManager {
     /*********
-     ** Properties
+     ** Fields
      *********/
     /// <summary>
     /// Variable if mod is enabled or disabled.
@@ -31,7 +31,26 @@ public sealed class GardenToolManager {
     /// Variable for timer.
     /// </summary>
     private int _timer;
+    /// <summary>
+    /// Support variable to ensure that tool cannot use again while animation is still going.
+    /// </summary>
+    private bool _animationEnded=true;
 
+    /*********
+     ** Properties
+     *********/
+    public bool DataChange{
+        get => _gardenTool.DataChanged;
+        set => _gardenTool.DataChanged = value;
+    }
+
+    public int SelectedOption{
+        get => _gardenTool.SelectedOption;
+    }
+
+    /**********
+     ** Public methods
+     *********/
     public GardenToolManager(bool enable, bool alwaysHighest, bool selectTemporary, GardenTool gardenTool, int timerStartValue){
         _enable = enable;
         _alwaysHighest = alwaysHighest;
@@ -39,49 +58,29 @@ public sealed class GardenToolManager {
         _gardenTool = gardenTool;
         _timerStartValue = timerStartValue;
     }
-
-    /**********
-     ** Public methods
-     *********/
-    /// <summary>
-    /// Getter and setter for DataChange property.
-    /// </summary>
-    public bool DataChange{
-        get => _gardenTool.DataChanged;
-        set => _gardenTool.DataChanged = value;
-    }
-
-    /// <summary>
-    /// Getter for SelectedOption property.
-    /// </summary>
-    public int SelectedOption{
-        get => _gardenTool.SelectedOption;
-    }
+    
     /// <summary>
     /// Button change action.
     /// </summary>
-    public void ButtonAction(SButton state, IModHelper helper){
+    public void ButtonAction(IModHelper helper){
         if (!_enable)
             return;
-        
-        _gardenTool.Refresh();
         
         if(_alwaysHighest && !_selectTemporary)
             return;
         
-        if(helper.Input.GetState(state)==SButtonState.Released){
-            if(_alwaysHighest && _selectTemporary){
-                TimerReset();
-            }
-            List<Response> choices = new List<Response>();
-            string selectionText=helper.Translation.Get("dialogbox.currentOption");
-            for(int i=0;i<=_gardenTool.GetMaximumSelectableOptionValue();i++){
-                string responseKey=$"{i}";
-                string responseText=helper.Translation.Get($"dialogbox.option{i}");
-                choices.Add(new Response(responseKey,responseText+(_gardenTool.SelectedOption==i?$" --- {selectionText} ---":"")));
-            }
-            Game1.currentLocation.createQuestionDialogue(helper.Translation.Get(_gardenTool.TranslationKey), choices.ToArray(), _gardenTool.DialogueSet);
+        if(_alwaysHighest && _selectTemporary)
+            TimerReset();
+        
+        _gardenTool.Refresh();
+        List<Response> choices = new List<Response>();
+        string selectionText=helper.Translation.Get("dialogbox.currentOption");
+        for(int i=0;i<=_gardenTool.GetMaximumSelectableOptionValue();i++){
+            string responseKey=$"{i}";
+            string responseText=helper.Translation.Get($"dialogbox.option{i}");
+            choices.Add(new Response(responseKey,responseText+(_gardenTool.SelectedOption==i?$" --- {selectionText} ---":"")));
         }
+        Game1.currentLocation.createQuestionDialogue(helper.Translation.Get(_gardenTool.TranslationKey), choices.ToArray(), _gardenTool.DialogueSet);
     }
     
     /// <summary>
@@ -89,12 +88,28 @@ public sealed class GardenToolManager {
     /// </summary>
     public void Tick(){
         _gardenTool.Refresh();
+
+        if (_gardenTool.UpgradeLevel==0 || _gardenTool.SelectedOption==0){
+            Game1.player.toolPower.Value=0;
+            if (!Game1.player.UsingTool){
+                _animationEnded=true;
+                return;
+            }
+            if (!_animationEnded)
+                return;
+            
+            Game1.player.EndUsingTool();
+            _animationEnded=false;
+            return;
+        }
         
         if(_alwaysHighest){
             if(!_selectTemporary || (_selectTemporary && TimerEnded())){
                 _gardenTool.SelectedOption = _gardenTool.GetMaximumSelectableOptionValue();
             }
         }
+
+        Game1.player.toolHold.Value=600;
         Game1.player.toolPower.Value=_gardenTool.SelectedOption;
     }
     
@@ -102,7 +117,7 @@ public sealed class GardenToolManager {
     /// If the timer is not zero then it will continue countdown.
     /// </summary>
     public void TimerTick(){
-        if (_timer != 0)
+        if (!TimerEnded())
             _timer--;
     }
 
