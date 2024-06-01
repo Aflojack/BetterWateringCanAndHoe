@@ -87,6 +87,10 @@ public sealed class GardenToolManager {
     /// Tick method for garden tool.
     /// </summary>
     public void Tick(){
+        if (!_enable){
+            return;
+        }
+        
         _gardenTool.Refresh();
         
         if(_alwaysHighest){

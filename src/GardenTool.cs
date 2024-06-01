@@ -8,21 +8,10 @@ public sealed class GardenTool{
      ** Fields
      *********/
     /// <summary>
-    /// Stored TraslationKey for get text through i18n.
-    /// </summary>
-    private readonly string _translationKey;
-    /// <summary>
-    /// Actual garden tool upgrade level.
-    /// </summary>
-    private int _upgradeLevel;
-    /// <summary>
     /// Actual garden tool if it has reaching enchantment.
     /// </summary>
     private bool _hasReachingEnchantment;
-    /// <summary>
-    /// Variable if selected mode is actually changed.
-    /// </summary>
-    private bool _dataChanged;
+
     /// <summary>
     /// Current selected option.
     /// </summary>
@@ -39,32 +28,34 @@ public sealed class GardenTool{
                     return;
                 }
                 _selectedOption = value;
-                _dataChanged = true;
+                DataChanged = true;
                 return;
             }
             _selectedOption = 0;
-            _dataChanged = true;
+            DataChanged = true;
         }
     }
-    
-    public int UpgradeLevel{
-        get{ return _upgradeLevel; }
-    }
-    
-    public bool DataChanged{
-        get => _dataChanged;
-        set => _dataChanged = value;
-    }
-    
-    public string TranslationKey{
-        get => _translationKey;
-    }
-    
+
+    /// <summary>
+    /// Actual garden tool upgrade level.
+    /// </summary>
+    public int UpgradeLevel{ get; private set; }
+
+    /// <summary>
+    /// Variable if selected mode is actually changed.
+    /// </summary>
+    public bool DataChanged{ get; set; }
+
+    /// <summary>
+    /// Stored TranslationKey for get text through i18n.
+    /// </summary>
+    public string TranslationKey{ get; }
+
     /**********
      ** Public methods
      *********/
     public GardenTool(string translationKey, int selectedOption){
-        _translationKey = translationKey;
+        TranslationKey = translationKey;
         _selectedOption = selectedOption;
     }
     
@@ -72,7 +63,7 @@ public sealed class GardenTool{
     /// When it called it will refresh information of the garden tool.
     /// </summary>
     public void Refresh(){
-        _upgradeLevel = GetUpgradeLevel();
+        UpgradeLevel = GetUpgradeLevel();
         _hasReachingEnchantment = HasReachingEnchantment();
         SelectedOption = _selectedOption;
     }
@@ -80,11 +71,11 @@ public sealed class GardenTool{
     /// <summary>Determine which is the maximum selectable option value with the current upgradeLevel and enchangement.</summary>
     /// <returns>Maximum selectable option.</returns>
     public int GetMaximumSelectableOptionValue(){
-        switch(_upgradeLevel){
+        switch(UpgradeLevel){
             case 0:
             case 1:
             case 2:
-            case 3: return _upgradeLevel;
+            case 3: return UpgradeLevel;
             case 4: 
                 return _hasReachingEnchantment ? 5 : 4;
             default: return 0;
