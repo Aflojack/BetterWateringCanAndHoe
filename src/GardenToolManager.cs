@@ -5,124 +5,120 @@ namespace BetterWateringCanAndHoe;
 
 public sealed class GardenToolManager {
     /*********
-     ** Fields
+     ** Properties
      *********/
     /// <summary>
     /// Variable if mod is enabled or disabled.
     /// </summary>
-    private readonly bool _enable;
+    public bool Enabled { get; set; }
+
     /// <summary>
     /// Variable if mod need to automatically select highest option.
     /// </summary>
-    private readonly bool _alwaysHighest;
+    public bool AlwaysHighest { get; }
+
     /// <summary>
     /// Variable if mod need to allow temporary selection.
     /// </summary>
-    private readonly bool _selectTemporary;
+    public bool SelectTemporary { get; }
+
     /// <summary>
     /// Reset value for timer.
     /// </summary>
-    private readonly int _timerStartValue;
+    public int TimerStartValue { get; }
+
     /// <summary>
     /// Actual garden tool.
     /// </summary>
-    private readonly GardenTool _gardenTool;
+    public GardenTool GardenTool { get; }
+
     /// <summary>
     /// Variable for timer.
     /// </summary>
-    private int _timer;
-    /// <summary>
-    /// Support variable to ensure that tool cannot use again while animation is still going.
-    /// </summary>
-    private bool _animationEnded=true;
+    public int Timer { get; private set; }
 
-    /*********
-     ** Properties
-     *********/
-    public bool DataChange{
-        get => _gardenTool.DataChanged;
-        set => _gardenTool.DataChanged = value;
+    public bool DataChange {
+        get => GardenTool.DataChanged;
+        set => GardenTool.DataChanged = value;
     }
 
-    public int SelectedOption{
-        get => _gardenTool.SelectedOption;
+    public int SelectedOption {
+        get => GardenTool.SelectedOption;
     }
 
     /**********
      ** Public methods
      *********/
-    public GardenToolManager(bool enable, bool alwaysHighest, bool selectTemporary, GardenTool gardenTool, int timerStartValue){
-        _enable = enable;
-        _alwaysHighest = alwaysHighest;
-        _selectTemporary = selectTemporary;
-        _gardenTool = gardenTool;
-        _timerStartValue = timerStartValue;
+    public GardenToolManager(bool enabled, bool alwaysHighest, bool selectTemporary, GardenTool gardenTool,
+        int timerStartValue) {
+        Enabled = enabled;
+        AlwaysHighest = alwaysHighest;
+        SelectTemporary = selectTemporary;
+        GardenTool = gardenTool;
+        TimerStartValue = timerStartValue;
     }
-    
+
     /// <summary>
     /// Button change action.
     /// </summary>
-    public void ButtonAction(IModHelper helper){
-        if (!_enable)
+    public void ButtonActionOpenSelection(IModHelper helper) {
+        if (!Enabled || AlwaysHighest && !SelectTemporary)
             return;
-        
-        if(_alwaysHighest && !_selectTemporary)
-            return;
-        
-        if(_alwaysHighest && _selectTemporary)
-            TimerReset();
-        
-        _gardenTool.Refresh();
-        List<Response> choices = new List<Response>();
-        string selectionText=helper.Translation.Get("dialogbox.currentOption");
-        for(int i=0;i<=_gardenTool.GetMaximumSelectableOptionValue();i++){
-            string responseKey=$"{i}";
-            string responseText=helper.Translation.Get($"dialogbox.option{i}");
-            choices.Add(new Response(responseKey,responseText+(_gardenTool.SelectedOption==i?$" --- {selectionText} ---":"")));
+
+        if (GardenTool.GetMaximumSelectableOptionValue() == -1) {
+            throw new Exception(
+                $"Unsupported tool! Mod not compatible with {Game1.player.CurrentTool.ItemId} upgrade level: {GardenTool.GetUpgradeLevel()}");
         }
-        Game1.currentLocation.createQuestionDialogue(helper.Translation.Get(_gardenTool.TranslationKey), choices.ToArray(), _gardenTool.DialogueSet);
+
+        if (AlwaysHighest && SelectTemporary)
+            TimerReset();
+
+        GardenTool.Refresh();
+        ShowSelectionMenu(helper);
     }
     
+    /// <summary>
+    /// Prevent charging effect if selected option is tile (1) or current tool isn't upgraded yet.
+    /// </summary>
+    public void ButtonActionSingleLeftClick() {
+        if (!Enabled || (Game1.player.IsBusyDoingSomething() && !Game1.player.UsingTool) ||
+            (GardenTool.GetUpgradeLevel() != 0 && GardenTool.SelectedOption != 0))
+            return;
+
+        Game1.player.EndUsingTool();
+    }
+
     /// <summary>
     /// Tick method for garden tool.
     /// </summary>
-    public void Tick(){
-        if (!_enable){
-            return;
-        }
-        
-        _gardenTool.Refresh();
-        
-        if(_alwaysHighest){
-            if(!_selectTemporary || (_selectTemporary && TimerEnded())){
-                _gardenTool.SelectedOption = _gardenTool.GetMaximumSelectableOptionValue();
-            }
-        }
-        
-        if (_gardenTool.UpgradeLevel==0 || _gardenTool.SelectedOption==0){
-            Game1.player.toolPower.Value=0;
-            if (!Game1.player.UsingTool){
-                _animationEnded=true;
-                return;
-            }
-            if (!_animationEnded)
-                return;
-            
-            Game1.player.EndUsingTool();
-            _animationEnded=false;
+    public void Tick() {
+        if (!Enabled) {
             return;
         }
 
-        Game1.player.toolHold.Value=600;
-        Game1.player.toolPower.Value=_gardenTool.SelectedOption;
+        GardenTool.Refresh();
+
+        if (GardenTool.GetMaximumSelectableOptionValue() == -1) {
+            throw new Exception(
+                $"Unsupported tool! Mod not compatible with {Game1.player.CurrentTool.ItemId} upgrade level: {GardenTool.GetUpgradeLevel()}");
+        }
+
+        if (AlwaysHighest) {
+            if (!SelectTemporary || (SelectTemporary && TimerEnded())) {
+                GardenTool.SelectedOption = GardenTool.GetMaximumSelectableOptionValue();
+            }
+        }
+
+        Game1.player.toolHold.Value = 600;
+        Game1.player.toolPower.Value = GardenTool.SelectedOption;
     }
-    
+
     /// <summary>
     /// If the timer is not zero then it will continue countdown.
     /// </summary>
-    public void TimerTick(){
+    public void TimerTick() {
         if (!TimerEnded())
-            _timer--;
+            Timer--;
     }
 
     /**********
@@ -131,15 +127,30 @@ public sealed class GardenToolManager {
     /// <summary>
     /// Reset the timer with _timerStartValue.
     /// </summary>
-    private void TimerReset(){
-        _timer = _timerStartValue;
+    private void TimerReset() {
+        Timer = TimerStartValue;
     }
 
     /// <summary>
     /// Check if the timer is ended.
     /// </summary>
     /// <returns>If the timer ended (_timer==0)</returns>
-    private bool TimerEnded(){
-        return _timer == 0;
+    private bool TimerEnded() {
+        return Timer == 0;
+    }
+    
+    /// <summary>
+    /// Build dialog choices depends on current tool upgrade level and enchantment then show selection menu to the player.
+    /// </summary>
+    /// <param name="helper"></param> SMAPI helper
+    private void ShowSelectionMenu(IModHelper helper) {
+        List<Response> choices = new List<Response>();
+        string currentText = helper.Translation.Get("dialogbox.currentOption");
+        for (int i = 0; i <= GardenTool.GetMaximumSelectableOptionValue(); i++) {
+            string responseKey = $"{i}";
+            string responseText = helper.Translation.Get($"dialogbox.option{i}");
+            choices.Add(new Response(responseKey, responseText + (GardenTool.SelectedOption == i ? $" --- {currentText} ---" : "")));
+        }
+        Game1.currentLocation.createQuestionDialogue(helper.Translation.Get(GardenTool.TranslationKey), choices.ToArray(), GardenTool.DialogueSet);
     }
 }
