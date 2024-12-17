@@ -71,15 +71,18 @@ public sealed class ModCore {
     /// </summary>
     private string TranslationKey { get; }
 
+    private ModLoaded ModLoaded { get; }
+
     /**********
      ** Public methods
      *********/
-    public ModCore(bool enabled, bool alwaysHighest, bool selectTemporary, int timerStartValue, string translationKey, int selectedOption) {
+    public ModCore(bool enabled, bool alwaysHighest, bool selectTemporary, int timerStartValue, string translationKey, int selectedOption, ModLoaded modLoaded) {
         Enabled = enabled;
         AlwaysHighest = alwaysHighest;
         SelectTemporary = selectTemporary;
         TimerStartValue = timerStartValue;
         TranslationKey = translationKey;
+        ModLoaded = modLoaded;
         _selectedOption = selectedOption;
     }
 
@@ -172,7 +175,11 @@ public sealed class ModCore {
     private void ShowSelectionMenu(IModHelper helper) {
         List<Response> choices = new List<Response>();
         string currentText = helper.Translation.Get("dialogbox.currentOption");
-        for (int i = 0; i <= GetMaximumSelectableOptionValue(); i++) {
+        int maximumSelectableOptionValue = GetMaximumSelectableOptionValue();
+        for (int i = 0; i <=maximumSelectableOptionValue ; i++) {
+            if (ModLoaded.PrismaticToolsContinuedLoaded && maximumSelectableOptionValue == 6 && i == 5) {
+                i++;
+            }
             string responseKey = $"{i}";
             string responseText = helper.Translation.Get($"dialogbox.option{i}");
             choices.Add(new Response(responseKey, responseText + (SelectedOption == i ? $" --- {currentText} ---" : "")));
@@ -192,11 +199,17 @@ public sealed class ModCore {
     /// </summary>
     /// <returns>Maximum selectable option.</returns>
     private int GetMaximumSelectableOptionValue() {
-        switch (GetUpgradeLevel()) {
+        int currentUpgradeLevel = GetUpgradeLevel();
+        
+        if (ModLoaded.PrismaticToolsContinuedLoaded && currentUpgradeLevel == 24) {
+            return 6;
+        }
+        
+        switch (currentUpgradeLevel) {
             case 0:
             case 1:
             case 2:
-            case 3: return GetUpgradeLevel();
+            case 3: return currentUpgradeLevel;
             case 4:
                 return HasReachingEnchantment() ? 5 : 4;
             default: return -1;

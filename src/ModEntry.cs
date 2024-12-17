@@ -45,13 +45,15 @@ namespace BetterWateringCanAndHoe {
         private void OnSaveLoaded(object? sender, SaveLoadedEventArgs e) {
             try {
                 ModDataLoad();
+                ModLoaded modLoaded = new ModLoaded(Helper);
                 ModBetterHoe = new ModCore(
                     Config.BetterHoeModEnabled,
                     Config.HoeAlwaysHighestOption,
                     Config.HoeSelectTemporary,
                     Config.HoeTimerStart,
                     "dialogbox.hoeQuestion",
-                    Data.HoeSelectedOption
+                    Data.HoeSelectedOption,
+                    modLoaded
                 );
                 ModBetterWateringCan = new ModCore(
                     Config.BetterWateringCanModEnabled,
@@ -59,7 +61,8 @@ namespace BetterWateringCanAndHoe {
                     Config.WateringCanSelectTemporary,
                     Config.WateringCanTimerStart,
                     "dialogbox.wateringCanQuestion",
-                    Data.WateringCanSelectedOption
+                    Data.WateringCanSelectedOption,
+                    modLoaded
                 );
             } catch (Exception exception) {
                 Monitor.Log($"Caught exception while save loaded. Exception: {exception.Message}", LogLevel.Error);
