@@ -71,6 +71,9 @@ public sealed class ModCore {
     /// </summary>
     private string TranslationKey { get; }
 
+    /// <summary>
+    /// Store loaded mods for compatibility reasons
+    /// </summary>
     private ModLoaded ModLoaded { get; }
 
     /**********
