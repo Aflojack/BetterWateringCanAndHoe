@@ -1,5 +1,5 @@
 { 
-    "dialogbox.wateringCanQuestion": "How should I use my watering wan?",
+    "dialogbox.wateringCanQuestion": "How should I use my watering can?",
     "dialogbox.hoeQuestion": "How should I use my hoe?",
     "dialogbox.option0": "Tile (1)",
     "dialogbox.option1": "Row (3)",
@@ -7,6 +7,7 @@
     "dialogbox.option3": "Square (3x3)",
     "dialogbox.option4": "Rectangle (6x3)",
     "dialogbox.option5": "Square (5x5)",
+    "dialogbox.option6": "Rectangle (7x5)",
     "dialogbox.currentOption": "Current",
     "configMenu.wateringCan.title": "Better Watering Can",
     "configMenu.hoe.title": "Better Hoe",

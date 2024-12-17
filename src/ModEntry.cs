@@ -17,10 +17,10 @@ namespace BetterWateringCanAndHoe {
         private ModData Data;
 
         /// <summary>Manager class for Better Hoe mod.</summary>
-        private GardenToolManager BetterHoeManager;
+        private ModCore ModBetterHoe;
 
         /// <summary>Manager class for Better Watering Can mod.</summary>
-        private GardenToolManager BetterWateringCanManager;
+        private ModCore ModBetterWateringCan;
 
         /**********
          ** Public methods
@@ -45,20 +45,26 @@ namespace BetterWateringCanAndHoe {
         private void OnSaveLoaded(object? sender, SaveLoadedEventArgs e) {
             try {
                 ModDataLoad();
-                BetterHoeManager = new GardenToolManager(
+                ModLoaded modLoaded = new ModLoaded(Helper);
+                ModBetterHoe = new ModCore(
                     Config.BetterHoeModEnabled,
                     Config.HoeAlwaysHighestOption,
                     Config.HoeSelectTemporary,
-                    new GardenTool("dialogbox.hoeQuestion", Data.HoeSelectedOption),
-                    Config.HoeTimerStart);
-                BetterWateringCanManager = new GardenToolManager(
+                    Config.HoeTimerStart,
+                    "dialogbox.hoeQuestion",
+                    Data.HoeSelectedOption,
+                    modLoaded
+                );
+                ModBetterWateringCan = new ModCore(
                     Config.BetterWateringCanModEnabled,
                     Config.WateringCanAlwaysHighestOption,
                     Config.WateringCanSelectTemporary,
-                    new GardenTool("dialogbox.wateringCanQuestion", Data.WateringCanSelectedOption),
-                    Config.WateringCanTimerStart);
-            }
-            catch (Exception exception) {
+                    Config.WateringCanTimerStart,
+                    "dialogbox.wateringCanQuestion",
+                    Data.WateringCanSelectedOption,
+                    modLoaded
+                );
+            } catch (Exception exception) {
                 Monitor.Log($"Caught exception while save loaded. Exception: {exception.Message}", LogLevel.Error);
             }
         }
@@ -180,15 +186,15 @@ namespace BetterWateringCanAndHoe {
                 if (!Context.IsWorldReady)
                     return;
 
-                BetterWateringCanManager.TimerTick();
-                BetterHoeManager.TimerTick();
+                ModBetterWateringCan.TimerTick();
+                ModBetterHoe.TimerTick();
 
                 switch (Game1.player.CurrentTool) {
                     case WateringCan:
-                        BetterWateringCanManager.Tick();
+                        ModBetterWateringCan.Tick();
                         break;
                     case Hoe:
-                        BetterHoeManager.Tick();
+                        ModBetterHoe.Tick();
                         break;
                 }
 
@@ -196,8 +202,8 @@ namespace BetterWateringCanAndHoe {
             }
             catch (Exception exception) {
                 Monitor.Log($"Caught exception while game ticked. Mod disabled. Exception: {exception.Message}", LogLevel.Error);
-                BetterHoeManager.Enabled = false;
-                BetterWateringCanManager.Enabled = false;
+                ModBetterHoe.Enabled = false;
+                ModBetterWateringCan.Enabled = false;
             }
         }
 
@@ -212,17 +218,17 @@ namespace BetterWateringCanAndHoe {
 
                 switch (Game1.player.CurrentTool) {
                     case WateringCan:
-                        BetterWateringCanManager.ButtonActionSingleLeftClick();
+                        ModBetterWateringCan.ButtonActionSingleLeftClick();
                         break;
                     case Hoe:
-                        BetterHoeManager.ButtonActionSingleLeftClick();
+                        ModBetterHoe.ButtonActionSingleLeftClick();
                         break;
                 }
             }
             catch (Exception exception) {
                 Monitor.Log($"Caught exception while game ticked. Mod disabled. Exception: {exception.Message}", LogLevel.Error);
-                BetterHoeManager.Enabled = false;
-                BetterWateringCanManager.Enabled = false;
+                ModBetterHoe.Enabled = false;
+                ModBetterWateringCan.Enabled = false;
             }
         }
 
@@ -237,10 +243,10 @@ namespace BetterWateringCanAndHoe {
                 if (e.Button == Config.SelectionOpenKey) {
                     switch (Game1.player.CurrentTool) {
                         case WateringCan:
-                            BetterWateringCanManager.ButtonActionOpenSelection(Helper);
+                            ModBetterWateringCan.ButtonActionOpenSelection(Helper);
                             break;
                         case Hoe:
-                            BetterHoeManager.ButtonActionOpenSelection(Helper);
+                            ModBetterHoe.ButtonActionOpenSelection(Helper);
                             break;
                     }
                 }
@@ -259,14 +265,14 @@ namespace BetterWateringCanAndHoe {
 
         /// <summary>Write current player mod data json to data folder if that necessary.</summary>
         private void ModDataWrite() {
-            if (!BetterWateringCanManager.DataChange && !BetterHoeManager.DataChange)
+            if (!ModBetterWateringCan.DataChanged && !ModBetterHoe.DataChanged)
                 return;
 
-            Data.WateringCanSelectedOption = BetterWateringCanManager.SelectedOption;
-            Data.HoeSelectedOption = BetterHoeManager.SelectedOption;
+            Data.WateringCanSelectedOption = ModBetterWateringCan.SelectedOption;
+            Data.HoeSelectedOption = ModBetterHoe.SelectedOption;
             Helper.Data.WriteJsonFile($"data/{Constants.SaveFolderName}.json", Data);
-            BetterWateringCanManager.DataChange = false;
-            BetterHoeManager.DataChange = false;
+            ModBetterWateringCan.DataChanged = false;
+            ModBetterHoe.DataChanged = false;
         }
     }
 }
